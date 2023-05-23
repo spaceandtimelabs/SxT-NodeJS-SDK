@@ -3,7 +3,6 @@ dotenv.config();
 
 import axios from 'axios';
 import nacl from "tweetnacl";
-import base64url from 'base64url';
 import fs, { access, write } from 'fs';
 import os from 'os';
 import { ED25519PublicKeyUint, ED25519PrivateKeyUint, b64PrivateKey, b64PublicKey, hexEncodedPrivateKey, hexEncodedPublicKey, biscuitPrivateKey } from "./utils/keygen.js";
@@ -51,7 +50,6 @@ export default class SpaceAndTimeSDK {
             };
 
             const response = await axios.post(`${this.baseUrl}/auth/code`, payload);
-            console.log(`${this.baseUrl}/auth/code`)
             return [ response.data.authCode, null ];
             
         }
@@ -131,7 +129,6 @@ export default class SpaceAndTimeSDK {
         if(authCodeError) throw new Error(authCodeError);
 
         let privateKeyUint = this.base64ToUint8(privateKey, publicKey);
-        console.log(privateKeyUint)
 
         let signature = this.generateSignature(authCodeResponse, privateKeyUint);
         

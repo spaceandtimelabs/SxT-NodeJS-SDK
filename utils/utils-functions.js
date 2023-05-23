@@ -1,6 +1,3 @@
-import { isUrlSafeBase64 } from 'url-safe-base64'
-import CryptoJS from 'crypto-js';
-import Base64 from 'base64-js';
 
 function checkUserIdFormat(userId) {
     if (typeof userId !== 'string' && typeof userId !== 'number') {
