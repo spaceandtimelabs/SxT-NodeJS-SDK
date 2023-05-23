@@ -174,7 +174,7 @@ export default class SpaceAndTimeSDK {
 
         if(shouldRefreshToken) {
             if(shouldAuthenticateUser) {
-                let [ tokenResponse, tokenError ] = await this.Authenticate();
+                let [ tokenResponse, tokenError ] = await this.AuthenticateUser();
                 return [ tokenResponse, tokenError ];
             }
 
