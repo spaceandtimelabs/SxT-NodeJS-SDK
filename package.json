@@ -1,0 +1,23 @@
+{
+  "name": "nodesdk-sxt",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "An SDK to easily interact with Space and Time",
+  "main": "examples.js",
+  "scripts": {
+    "start": "node --experimental-wasm-modules examples.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@biscuit-auth/biscuit-wasm": "^0.4.0-alpha3",
+    "axios": "^1.3.4",
+    "base64-js": "^1.5.1",
+    "base64url": "^3.0.1",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.3",
+    "tweetnacl": "^1.0.3"
+  }
+}
