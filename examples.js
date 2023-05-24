@@ -187,24 +187,24 @@ console.log(createSchemaResponse, createSchemaError);
 // DDL
 
 // Can be used to Create a table
-let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(resourceId, createSqlText, accessType, mainPublicKey, biscuitToken);
+let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(createSqlText, accessType, mainPublicKey, biscuitToken, biscuitArray);
 console.log(CreateTableResponse, CreateTableError);
 
 // Can be used to Alter and Drop
-let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, alterSqlText, biscuitToken);
+let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, alterSqlText, biscuitToken, biscuitArray);
 console.log(DDLresponse, DDLerror);
 
 // DML
 
 // Can be used to insert, update, delete and merge
-let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitToken);
+let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitToken, biscuitArray);
 console.log(DMLResponse, DMLError);
 
 // DQL
 
 // Can be used to select
 // Selects all if rowCount = 0
-let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitToken);
+let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitToken, biscuitArray);
 console.log(DQLResponse, DQLError);
 
 /** Calls to Views **/
