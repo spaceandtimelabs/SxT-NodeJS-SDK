@@ -109,12 +109,10 @@ export default class SpaceAndTimeSDK {
         let userIdStatus = await this.checkUserIdExistance(userId);
         if(userIdStatus === false)
         {
-            console.log('Lets create your User ID!');
             return this.Authenticate(privateKey, publicKey);
         }
         else
         {
-            console.log('Time to Authenticate!');
             return this.Authenticate(privateKey, publicKey);
         }
 
@@ -522,7 +520,7 @@ export default class SpaceAndTimeSDK {
     }
 
     // Creating a Schema
-    async CreateSchema(sqlText, biscuitArray, originApp="") {
+    async CreateSchema(sqlText, biscuitTokens=[], originApp="") {
         
         try {
             let tokens = this.retrieveFileContents();
@@ -532,7 +530,7 @@ export default class SpaceAndTimeSDK {
             sqlText = sqlText.toUpperCase();
 
             let payload = {
-                biscuits: biscuitArray,
+                biscuits: biscuitTokens,
                 sqlText: sqlText
             }
 
@@ -554,7 +552,7 @@ export default class SpaceAndTimeSDK {
 
     // DDL
     // Create a table with the given resourceId
-    async CreateTable(sqlText, accessType, publicKey, biscuit, biscuitTokens, originApp="") {
+    async CreateTable(sqlText, accessType, publicKey, biscuit, biscuitTokens=[], originApp="") {
 
         try {
 
@@ -593,7 +591,7 @@ export default class SpaceAndTimeSDK {
     }
 
     // Alter and drop a table with the given resourceId
-    async DDL(sqlText, biscuit, biscuitTokens, originApp="") {
+    async DDL(sqlText, biscuit, biscuitTokens=[], originApp="") {
 
         try {
             let tokens = this.retrieveFileContents();
@@ -625,7 +623,7 @@ export default class SpaceAndTimeSDK {
 
     // DML
     // Perform insert, update, merge and delete with the given resourceId 
-    async DML(resourceId, sqlText, biscuit, biscuitTokens, originApp="") {
+    async DML(resourceId, sqlText, biscuit, biscuitTokens=[], originApp="") {
 
         try {
 
@@ -663,7 +661,7 @@ export default class SpaceAndTimeSDK {
 
     //DQL
     // Perform selection with the given resourceId and if rowCount is 0 then the query will fetch all of the data
-    async DQL(resourceId, sqlText, biscuit, biscuitTokens, originApp="", rowCount = 0) { 
+    async DQL(resourceId, sqlText, biscuit, biscuitTokens=[], originApp="", rowCount = 0) { 
 
         try {
 
