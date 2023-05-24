@@ -127,7 +127,7 @@ export default class SpaceAndTimeSDK {
 
         let [ authCodeResponse, authCodeError ] = await this.#generateAuthCode(userId, prefix, joinCode);
         if(authCodeError) throw new Error(authCodeError);
-
+        
         let privateKeyUint = this.base64ToUint8(privateKey, publicKey);
 
         let signature = this.generateSignature(authCodeResponse, privateKeyUint);
@@ -522,7 +522,7 @@ export default class SpaceAndTimeSDK {
     }
 
     // Creating a Schema
-    async CreateSchema(sqlText) {
+    async CreateSchema(sqlText, biscuitArray, originApp="") {
         
         try {
             let tokens = this.retrieveFileContents();
@@ -532,6 +532,7 @@ export default class SpaceAndTimeSDK {
             sqlText = sqlText.toUpperCase();
 
             let payload = {
+                biscuits: biscuitArray,
                 sqlText: sqlText
             }
 
@@ -539,6 +540,7 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
+                    originApp:originApp
                 }
             }
 
@@ -552,14 +554,13 @@ export default class SpaceAndTimeSDK {
 
     // DDL
     // Create a table with the given resourceId
-    async CreateTable(resourceId, sqlText, accessType, publicKey, biscuitToken) {
+    async CreateTable(sqlText, accessType, publicKey, biscuit, biscuitTokens, originApp="") {
 
         try {
-            
+
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkPostgresIdentifier(resourceId);
             Utils.checkStringFormat(sqlText);
             Utils.checkStringFormat(accessType);
 
@@ -568,7 +569,7 @@ export default class SpaceAndTimeSDK {
             let createSQLText = this.convertSQLText(sqlText, publicKey, accessType);
  
             let payload = {
-                resourceId: resourceId.toUpperCase(),
+                biscuits: biscuitTokens,
                 sqlText: createSQLText,
             }
 
@@ -577,7 +578,8 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    Biscuit: biscuitToken,
+                    Biscuit: biscuit,
+                    originApp: originApp
                 }
             }
     
@@ -591,16 +593,14 @@ export default class SpaceAndTimeSDK {
     }
 
     // Alter and drop a table with the given resourceId
-    async DDL(resourceId, sqlText, biscuitToken) {
+    async DDL(sqlText, biscuit, biscuitTokens, originApp="") {
 
         try {
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
-
-            Utils.checkPostgresIdentifier(resourceId);
                 
             let payload = {
-                resourceId: resourceId.toUpperCase(),
+                biscuits: biscuitTokens,
                 sqlText: sqlText.toUpperCase(),
             }
         
@@ -609,7 +609,8 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    biscuit: biscuitToken,
+                    Biscuit: biscuit,
+                    originApp: originApp
                 }
             }
     
@@ -624,7 +625,7 @@ export default class SpaceAndTimeSDK {
 
     // DML
     // Perform insert, update, merge and delete with the given resourceId 
-    async DML(resourceId, sqlText, biscuitToken) {
+    async DML(resourceId, sqlText, biscuit, biscuitTokens, originApp="") {
 
         try {
 
@@ -635,6 +636,7 @@ export default class SpaceAndTimeSDK {
             Utils.checkStringFormat(sqlText);
             
             let payload = {
+                biscuits: biscuitTokens,
                 resourceId: resourceId.toUpperCase(),
                 sqlText: sqlText.toUpperCase(),
             }
@@ -644,7 +646,8 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    biscuit: biscuitToken,
+                    Biscuit: biscuit,
+                    originApp: originApp
                 }
             }
     
@@ -660,7 +663,7 @@ export default class SpaceAndTimeSDK {
 
     //DQL
     // Perform selection with the given resourceId and if rowCount is 0 then the query will fetch all of the data
-    async DQL(resourceId, sqlText, rowCount = 0, biscuitToken) { 
+    async DQL(resourceId, sqlText, biscuit, biscuitTokens, originApp="", rowCount = 0) { 
 
         try {
 
@@ -673,6 +676,7 @@ export default class SpaceAndTimeSDK {
             let payload = {};
             if(rowCount > 0) {
                 payload = {
+                    biscuits: biscuitTokens,
                     resourceId: resourceId.toUpperCase(),
                     sqlText: sqlText.toUpperCase(),
                     rowCount: rowCount
@@ -680,6 +684,7 @@ export default class SpaceAndTimeSDK {
             }
             else {
                 payload = {
+                biscuits: biscuitTokens,
                 resourceId: resourceId.toUpperCase(),
                 sqlText: sqlText.toUpperCase()
                }
@@ -690,7 +695,8 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    biscuit: biscuitToken,
+                    Biscuit: biscuit,
+                    originApp: originApp
                 }
             }
 
