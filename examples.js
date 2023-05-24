@@ -166,6 +166,7 @@ let generateBiscuit = (resourceId, hexPrivateKey, biscuitOperation = "") => {
 let accessTokenParam = accessToken;
 let mainPublicKey = "";
 let mainPrivateKey = "";
+let biscuitArray = ["EpABCiYKD..."]
 let biscuitToken = "";
 let accessType = "public_append";
 
