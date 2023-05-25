@@ -125,7 +125,6 @@ export default class SpaceAndTimeSDK {
 
         let [ authCodeResponse, authCodeError ] = await this.#generateAuthCode(userId, prefix, joinCode);
         if(authCodeError) throw new Error(authCodeError);
-        
         let privateKeyUint = this.base64ToUint8(privateKey, publicKey);
 
         let signature = this.generateSignature(authCodeResponse, privateKeyUint);
@@ -521,7 +520,6 @@ export default class SpaceAndTimeSDK {
 
     // Creating a Schema
     async CreateSchema(sqlText, biscuitTokens=[], originApp="") {
-        
         try {
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
@@ -592,11 +590,9 @@ export default class SpaceAndTimeSDK {
 
     // Alter and drop a table with the given resourceId
     async DDL(sqlText, biscuit, biscuitTokens=[], originApp="") {
-
         try {
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
-                
             let payload = {
                 biscuits: biscuitTokens,
                 sqlText: sqlText.toUpperCase(),

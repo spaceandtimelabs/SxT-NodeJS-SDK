@@ -1,5 +1,4 @@
 import nacl from "tweetnacl";
-
 // https://www.npmjs.com/package/tweetnacl#naclsignkeypair
 // Nacl Sign keypair uses ed25519 algorithm by default
 

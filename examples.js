@@ -128,7 +128,6 @@ console.log(foreignKeyReferenceResponse, foreignKeyReferenceError);
 
 /** Calls to CoreSQL APIs **/
 
- // Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
 // Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
 let generateBiscuit = (resourceId, hexPrivateKey, biscuitOperation = "") => {
     Utils.checkPostgresIdentifier(resourceId);
