@@ -6,6 +6,8 @@ dotenv.config();
 import fs, { access, write } from 'fs';
 
 import SpaceAndTimeSDK from "./SpaceAndTimeSDK.js";
+import Utils from './utils/utils-functions.js';		
+import SQLOperation from './BiscuitConstants.js';		
 import { ED25519PublicKeyUint, ED25519PrivateKeyUint, b64PrivateKey, b64PublicKey, hexEncodedPrivateKey, hexEncodedPublicKey, biscuitPrivateKey } from "./utils/keygen.js";
 import  {biscuit, block, authorizer, Biscuit, KeyPair, Fact, PrivateKey} from '@biscuit-auth/biscuit-wasm';
 
@@ -126,17 +128,36 @@ console.log(foreignKeyReferenceResponse, foreignKeyReferenceError);
 
 /** Calls to CoreSQL APIs **/
 
- // Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
- let generateBiscuit = (resourceId, hexPrivateKey) => { 
-        
+// Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
+let generateBiscuit = (resourceId, hexPrivateKey, biscuitOperation = "") => {
+    Utils.checkPostgresIdentifier(resourceId);
     let queryTableName = resourceId.toLowerCase();
-    const biscuitCapabilityContainer = [{ biscuitOperation: "ddl_create", biscuitResource: queryTableName }, { biscuitOperation: "ddl_alter", biscuitResource: queryTableName}, { biscuitOperation: "ddl_drop", biscuitResource: queryTableName }, { biscuitOperation: "dml_insert", biscuitResource:queryTableName }, { biscuitOperation: "dml_update", biscuitResource: queryTableName }, { biscuitOperation: "dml_merge", biscuitResource: queryTableName }, { biscuitOperation: "dml_delete", biscuitResource: queryTableName }, { biscuitOperation: "dql_select", biscuitResource:queryTableName }]
-    let privKey = hexPrivateKey; 
     let biscuitBuilder = biscuit``;
-    for(const {biscuitOperation, biscuitResource} of biscuitCapabilityContainer) {
-        biscuitBuilder.merge(block`capability(${biscuitOperation},${biscuitResource});`);
+
+    const wildCardRequired = biscuitOperation === '*';
+
+    if(wildCardRequired) {
+        biscuitBuilder.merge(block`sxt:capability(${biscuitOperation},${biscuitOperation})`); 
     }
-    
+    else {
+        const biscuitCapabilityContainer = [];
+
+        biscuitCapabilityContainer.push(SQLOperation.CREATE.Value);
+        biscuitCapabilityContainer.push(SQLOperation.ALTER.Value);
+        biscuitCapabilityContainer.push(SQLOperation.DROP.Value);
+        biscuitCapabilityContainer.push(SQLOperation.INSERT.Value);
+        biscuitCapabilityContainer.push(SQLOperation.UPDATE.Value);
+        biscuitCapabilityContainer.push(SQLOperation.MERGE.Value);
+        biscuitCapabilityContainer.push(SQLOperation.DELETE.Value);
+        biscuitCapabilityContainer.push(SQLOperation.SELECT.Value);
+
+
+        for(const biscuitSQLOperation of biscuitCapabilityContainer) {
+            biscuitBuilder.merge(block`sxt:capability(${biscuitSQLOperation},${queryTableName})`)
+        }
+    }
+
+    let privKey = hexPrivateKey;
     let biscuitToken = biscuitBuilder.build(PrivateKey.fromString(privKey)).toBase64();
     return biscuitToken;
 }
@@ -144,6 +165,7 @@ console.log(foreignKeyReferenceResponse, foreignKeyReferenceError);
 let accessTokenParam = accessToken;
 let mainPublicKey = "";
 let mainPrivateKey = "";
+let biscuitArray = ["EpABCiYKD..."]
 let biscuitToken = "";
 let accessType = "public_append";
 
@@ -165,24 +187,24 @@ console.log(createSchemaResponse, createSchemaError);
 // DDL
 
 // Can be used to Create a table
-let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(resourceId, createSqlText, accessType, mainPublicKey, biscuitToken);
+let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(createSqlText, accessType, mainPublicKey, biscuitToken, biscuitArray);
 console.log(CreateTableResponse, CreateTableError);
 
 // Can be used to Alter and Drop
-let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, alterSqlText, biscuitToken);
+let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, alterSqlText, biscuitToken, biscuitArray);
 console.log(DDLresponse, DDLerror);
 
 // DML
 
 // Can be used to insert, update, delete and merge
-let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitToken);
+let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitToken, biscuitArray);
 console.log(DMLResponse, DMLError);
 
 // DQL
 
 // Can be used to select
 // Selects all if rowCount = 0
-let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitToken);
+let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitToken, biscuitArray);
 console.log(DQLResponse, DQLError);
 
 /** Calls to Views **/

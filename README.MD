@@ -108,13 +108,13 @@ Sample biscuit generation with permissions for `select query`,`insert query`, `u
 
 	// Only for Create Table Queries
 	// for ALTER and DROP, use DDL()
-	let [CreateTableResponse, CreateTableError] =  await initSDK.CreateTable("ETH.TESTTABLE", "CREATE TABLE ETH.TESTTABLE(id INT PRIMARY KEY, test VARCHAR)", "permissioned", publickey, biscuit);
+	let [CreateTableResponse, CreateTableError] =  await initSDK.CreateTable("CREATE TABLE ETH.TESTTABLE(id INT PRIMARY KEY, test VARCHAR)", "permissioned", publickey, biscuit);
 
 	console.log('Response: ', CreateTableResponse)
 	console.log('Error: ', CreateTableError)
 
 	// For ALTER and DROP
-	let [DDLresponse, DDLerror] =  await initSDK.DDL("ETH.TESTTABLE", "ALTER TABLE ETH.TESTTABLE ADD TEST2 VARCHAR", biscuit);
+	let [DDLresponse, DDLerror] =  await initSDK.DDL("ALTER TABLE ETH.TESTTABLE ADD TEST2 VARCHAR", biscuit);
 
 	console.log('Response: ', DDLresponse)
 	console.log('Error: ', DDLerror)
