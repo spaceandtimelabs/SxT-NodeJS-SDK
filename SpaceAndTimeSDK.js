@@ -595,7 +595,7 @@ export default class SpaceAndTimeSDK {
             let accessToken = tokens.accessToken;
             let payload = {
                 biscuits: biscuitTokens,
-                sqlText: sqlText.toUpperCase(),
+                sqlText: sqlText
             }
         
             let accessTokenValue = 'Bearer ' + accessToken; 
@@ -632,7 +632,7 @@ export default class SpaceAndTimeSDK {
             let payload = {
                 biscuits: biscuitTokens,
                 resourceId: resourceId.toUpperCase(),
-                sqlText: sqlText.toUpperCase(),
+                sqlText: sqlText
             }
 
             let accessTokenValue = 'Bearer ' + accessToken; 
@@ -672,7 +672,7 @@ export default class SpaceAndTimeSDK {
                 payload = {
                     biscuits: biscuitTokens,
                     resourceId: resourceId.toUpperCase(),
-                    sqlText: sqlText.toUpperCase(),
+                    sqlText: sqlText,
                     rowCount: rowCount
                 }
             }
@@ -680,7 +680,7 @@ export default class SpaceAndTimeSDK {
                 payload = {
                 biscuits: biscuitTokens,
                 resourceId: resourceId.toUpperCase(),
-                sqlText: sqlText.toUpperCase()
+                sqlText: sqlText
                }
             }
 

@@ -171,7 +171,7 @@ let accessType = "public_append";
 
 let createSchemaSQLText = "CREATE SCHEMA ETH";
 let createSqlText = "CREATE TABLE ETH.TESTETH12 (ID INT PRIMARY KEY, TEST VARCHAR)";
-let alterSqlText = "ALTER TABLE ETH.TESTETH12 ADD BLOCK_NUMBER BIGINT";
+let dropSqlText = "DROP TABLE ETH.TESTETH12";
 let insertSqlText = "INSERT INTO ETH.TESTETH12 VALUES(4, 'x4')"
 let selectSqlStatement = "SELECT * FROM ETH.TESTETH12"
 
@@ -190,8 +190,8 @@ console.log(createSchemaResponse, createSchemaError);
 let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(createSqlText, accessType, mainPublicKey, biscuitToken, biscuitArray);
 console.log(CreateTableResponse, CreateTableError);
 
-// Can be used to Alter and Drop
-let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, alterSqlText, biscuitToken, biscuitArray);
+// Can be used to Drop
+let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, dropSqlText, biscuitToken, biscuitArray);
 console.log(DDLresponse, DDLerror);
 
 // DML
