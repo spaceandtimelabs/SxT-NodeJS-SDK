@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "An SDK to easily interact with Space and Time",
-  "main": "examples.js",
+  "main": "SpaceAndTimeSDK.js",
   "scripts": {
     "start": "node --experimental-wasm-modules examples.js",
     "test": "echo \"Error: no test specified\" && exit 1"
