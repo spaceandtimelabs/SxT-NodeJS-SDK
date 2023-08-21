@@ -143,7 +143,7 @@ let selectSqlStatement = "SELECT * FROM ETH.TESTETH12"
 let resourceId = "ETH.TESTETH12";
 
 // Generate Biscuits
-let biscuitsGenerated = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "ALTER", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]));
+let biscuitsGenerated = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "ALTER", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]);
 console.log(biscuitsGenerated)
 
 // Create a Schema

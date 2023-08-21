@@ -8,6 +8,7 @@ import os from 'os';
 import { ED25519PublicKeyUint, ED25519PrivateKeyUint, b64PrivateKey, b64PublicKey, hexEncodedPrivateKey, hexEncodedPublicKey, biscuitPrivateKey } from "./utils/keygen.js";
 import { biscuit, block, authorizer, Biscuit, KeyPair, Fact, PrivateKey, BiscuitBuilder } from '@biscuit-auth/biscuit-wasm';
 import Utils from './utils/utils-functions.js';
+import SQLOperation from './BiscuitConstants.js';	
 import cron from 'node-cron'
 
 export default class SpaceAndTimeSDK {
