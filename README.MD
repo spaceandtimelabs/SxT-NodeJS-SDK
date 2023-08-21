@@ -70,27 +70,14 @@ The generated ``AccessToken`` is valid for 25 minutes and the ``RefreshToken`` f
 
 You can create multiple biscuit tokens for a table allowing you to provide different access levels for users. For the list of all capabilities, refer our [documentation](https://docs.spaceandtime.io/docs/biscuit-authorization).
 
-Sample biscuit generation with permissions for `select query`,`insert query`, `update query`, `delete query`, `create table`
+Sample biscuit generation with permissions for `select query`,`insert query`, `update query`, `delete query`, `create table`.
+
+	**Note**:
+	
+	Specifying True in the function will give you a wildcard biscuit with all of the permissions.
 
 ```js
-
-	const biscuitCapabilityContainer = 
-	[
-		{ biscuitOperation: "dql_select", biscuitResource: "ETH.TESTTABLE" },
-		{ biscuitOperation: "dml_insert", biscuitResource: "ETH.TESTTABLE" }, 
-		{ biscuitOperation: "dml_update", biscuitResource: "ETH.TESTTABLE" },
-		{ biscuitOperation: "dml_delete", biscuitResource: "ETH.TESTTABLE" },
-		{ biscuitOperation: "ddl_create", biscuitResource: "ETH.TESTTABLE" },  
-	]
-
-	let biscuitBuilder = biscuit``;
-	for(const {biscuitOperation, biscuitResource} of biscuitCapabilityContainer) 
-	{
-	   biscuitBuilder.merge(block`capability(${biscuitOperation},${biscuitResource});`);
-	}
-
-	// Generate the biscuit token
-	biscuitToken = generateBiscuit("ETH.TESTTABLE", biscuitPrivateKey)
+let biscuitArray = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]);
 ```
 
 - **DDL, DML and DQL**
@@ -107,27 +94,27 @@ Sample biscuit generation with permissions for `select query`,`insert query`, `u
 	console.log('Error: ', createSchemaError)
 
 	// Only for Create Table Queries
-	// for ALTER and DROP, use DDL()
-	let [CreateTableResponse, CreateTableError] =  await initSDK.CreateTable("CREATE TABLE ETH.TESTTABLE(id INT PRIMARY KEY, test VARCHAR)", "permissioned", publickey, biscuit);
+	// for DROP, use DDL()
+	let [CreateTableResponse, CreateTableError] =  await initSDK.CreateTable("CREATE TABLE ETH.TESTTABLE(id INT PRIMARY KEY, test VARCHAR)", "permissioned", publickey, biscuitArray);
 
 	console.log('Response: ', CreateTableResponse)
 	console.log('Error: ', CreateTableError)
 
-	// For ALTER and DROP
-	let [DDLresponse, DDLerror] =  await initSDK.DDL("ALTER TABLE ETH.TESTTABLE ADD TEST2 VARCHAR", biscuit);
+	// For DROP
+	let [DDLresponse, DDLerror] =  await initSDK.DDL("DROP TABLE ETH.TESTTABLE", biscuit);
 
 	console.log('Response: ', DDLresponse)
 	console.log('Error: ', DDLerror)
 
 	// DML 
 	// Use DML() to insert, update, delete and merge queries
-	let [DMLResponse, DMLError] =  await initSDK.DML("ETH.TESTTABLE", "INSERT INTO ETH.TESTTABLE VALUES(5, 'X5')", biscuit);
+	let [DMLResponse, DMLError] =  await initSDK.DML("ETH.TESTTABLE", "INSERT INTO ETH.TESTTABLE VALUES(5, 'X5')", biscuitArray);
 
 	console.log('Response: ', DMLResponse)
 	console.log('Error: ', DMLError)
 
 	// DQL for selecting content from the blockchain tables.
-	let [DQLResponse, DQLError] =  await initSDK.DQL("ETH.TESTTABLE", "SELECT * FROM ETH.TESTTABLE", biscuit);
+	let [DQLResponse, DQLError] =  await initSDK.DQL("ETH.TESTTABLE", "SELECT * FROM ETH.TESTTABLE", biscuitArray);
 
 	console.log('Response: ', DQLResponse)
 	console.log('Error: ', DQLError)
