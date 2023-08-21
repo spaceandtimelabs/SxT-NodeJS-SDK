@@ -647,7 +647,7 @@ export default class SpaceAndTimeSDK {
         }
     }
 
-    // Alter and drop a table with the given resourceId
+    // Drop a table with the given resourceId
     async DDL(sqlText, biscuitTokens=[], originApp="") {
         try {
             let tokens = this.retrieveFileContents();
@@ -696,7 +696,7 @@ export default class SpaceAndTimeSDK {
             let payload = {
                 biscuits: biscuitTokens,
                 resourceId: resourceId.toUpperCase(),
-                sqlText: sqlText.toUpperCase(),
+                sqlText: sqlText
             }
 
             let accessTokenValue = 'Bearer ' + accessToken; 
@@ -736,7 +736,7 @@ export default class SpaceAndTimeSDK {
                 payload = {
                     biscuits: biscuitTokens,
                     resourceId: resourceId.toUpperCase(),
-                    sqlText: sqlText.toUpperCase(),
+                    sqlText: sqlText,
                     rowCount: rowCount
                 }
             }
@@ -744,7 +744,7 @@ export default class SpaceAndTimeSDK {
                 payload = {
                 biscuits: biscuitTokens,
                 resourceId: resourceId.toUpperCase(),
-                sqlText: sqlText.toUpperCase()
+                sqlText: sqlText
                }
             }
 

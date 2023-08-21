@@ -127,7 +127,6 @@ let [foreignKeyReferenceResponse, foreignKeyReferenceError] = await initSDK.getF
 console.log(foreignKeyReferenceResponse, foreignKeyReferenceError);
 
 /** Calls to CoreSQL APIs **/
-
 let accessTokenParam = accessToken;
 let mainPublicKey = "";
 let mainPrivateKey = "";
@@ -144,7 +143,8 @@ let selectSqlStatement = "SELECT * FROM ETH.TESTETH12"
 let resourceId = "ETH.TESTETH12";
 
 // Generate Biscuits
-console.log(initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "ALTER", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]));
+let biscuitsGenerated = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "ALTER", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]));
+console.log(biscuitsGenerated)
 
 // Create a Schema
 let [ createSchemaResponse, createSchemaError ] = await initSDK.CreateSchema(createSchemaSQLText);
@@ -156,7 +156,7 @@ console.log(createSchemaResponse, createSchemaError);
 let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(createSqlText, accessType, mainPublicKey, biscuitArray);
 console.log(CreateTableResponse, CreateTableError);
 
-// Can be used to Alter and Drop
+// Can be used to Drop
 let [DDLresponse, DDLerror] = await initSDK.DDL(dropSqlText, biscuitArray);
 console.log(DDLresponse, DDLerror);
 
