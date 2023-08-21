@@ -654,7 +654,6 @@ export default class SpaceAndTimeSDK {
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkPostgresIdentifier(resourceId);
             Utils.checkStringFormat(sqlText);
             Utils.checkArrayFormat(biscuitTokens);
 
