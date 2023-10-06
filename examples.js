@@ -127,41 +127,6 @@ let [foreignKeyReferenceResponse, foreignKeyReferenceError] = await initSDK.getF
 console.log(foreignKeyReferenceResponse, foreignKeyReferenceError);
 
 /** Calls to CoreSQL APIs **/
-
-// Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
-let generateBiscuit = (resourceId, hexPrivateKey, biscuitOperation = "") => {
-    Utils.checkPostgresIdentifier(resourceId);
-    let queryTableName = resourceId.toLowerCase();
-    let biscuitBuilder = biscuit``;
-
-    const wildCardRequired = biscuitOperation === '*';
-
-    if(wildCardRequired) {
-        biscuitBuilder.merge(block`sxt:capability(${biscuitOperation},${biscuitOperation})`); 
-    }
-    else {
-        const biscuitCapabilityContainer = [];
-
-        biscuitCapabilityContainer.push(SQLOperation.CREATE.Value);
-        biscuitCapabilityContainer.push(SQLOperation.ALTER.Value);
-        biscuitCapabilityContainer.push(SQLOperation.DROP.Value);
-        biscuitCapabilityContainer.push(SQLOperation.INSERT.Value);
-        biscuitCapabilityContainer.push(SQLOperation.UPDATE.Value);
-        biscuitCapabilityContainer.push(SQLOperation.MERGE.Value);
-        biscuitCapabilityContainer.push(SQLOperation.DELETE.Value);
-        biscuitCapabilityContainer.push(SQLOperation.SELECT.Value);
-
-
-        for(const biscuitSQLOperation of biscuitCapabilityContainer) {
-            biscuitBuilder.merge(block`sxt:capability(${biscuitSQLOperation},${queryTableName})`)
-        }
-    }
-
-    let privKey = hexPrivateKey;
-    let biscuitToken = biscuitBuilder.build(PrivateKey.fromString(privKey)).toBase64();
-    return biscuitToken;
-}
-
 let accessTokenParam = accessToken;
 let mainPublicKey = "";
 let mainPrivateKey = "";
@@ -171,14 +136,15 @@ let accessType = "public_append";
 
 let createSchemaSQLText = "CREATE SCHEMA ETH";
 let createSqlText = "CREATE TABLE ETH.TESTETH12 (ID INT PRIMARY KEY, TEST VARCHAR)";
-let dropSqlText = "DROP TABLE ETH.TESTETH12";
+let dropSqlText = "DROP TABLE ETH.TESTETH12"
 let insertSqlText = "INSERT INTO ETH.TESTETH12 VALUES(4, 'x4')"
 let selectSqlStatement = "SELECT * FROM ETH.TESTETH12"
 
 let resourceId = "ETH.TESTETH12";
 
-// Biscuit Generation Function
-console.log(generateBiscuit(resourceId, biscuitPrivateKey));
+// Generate Biscuits
+let biscuitsGenerated = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "ALTER", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]);
+console.log(biscuitsGenerated)
 
 // Create a Schema
 let [ createSchemaResponse, createSchemaError ] = await initSDK.CreateSchema(createSchemaSQLText);
@@ -187,24 +153,24 @@ console.log(createSchemaResponse, createSchemaError);
 // DDL
 
 // Can be used to Create a table
-let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(createSqlText, accessType, mainPublicKey, biscuitToken, biscuitArray);
+let [CreateTableResponse, CreateTableError] = await initSDK.CreateTable(createSqlText, accessType, mainPublicKey, biscuitArray);
 console.log(CreateTableResponse, CreateTableError);
 
 // Can be used to Drop
-let [DDLresponse, DDLerror] = await initSDK.DDL(resourceId, dropSqlText, biscuitToken, biscuitArray);
+let [DDLresponse, DDLerror] = await initSDK.DDL(dropSqlText, biscuitArray);
 console.log(DDLresponse, DDLerror);
 
 // DML
 
 // Can be used to insert, update, delete and merge
-let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitToken, biscuitArray);
+let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitArray);
 console.log(DMLResponse, DMLError);
 
 // DQL
 
 // Can be used to select
 // Selects all if rowCount = 0
-let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitToken, biscuitArray);
+let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitArray);
 console.log(DQLResponse, DQLError);
 
 /** Calls to Views **/

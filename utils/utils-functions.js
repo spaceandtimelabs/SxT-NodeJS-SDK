@@ -14,6 +14,12 @@ function checkStringFormat(userString) {
     }
 }
 
+function checkArrayFormat(userArray){
+  if(!Array.isArray(userArray)) {
+    throw new Error(`Expected an array but got ${typeof userArray}`)
+  }
+}
+
 const VALID_DB_RESOURCE_IDENTIFIER = /^[A-Z_][A-Z0-9_]+$/;
 const INVALID_RESOURCEID = "Invalid resourceId";
 const DEFAULT_SCHEMA = "PUBLIC";
@@ -88,6 +94,7 @@ function checkSignature(signature) {
 let Utils = {
     checkUserIdFormat,
     checkStringFormat,
+    checkArrayFormat,
     checkPostgresIdentifier,
     checkBooleanFormat,
     checkIsSameUrl,

@@ -6,7 +6,10 @@ import nacl from "tweetnacl";
 import fs, { access, write } from 'fs';
 import os from 'os';
 import { ED25519PublicKeyUint, ED25519PrivateKeyUint, b64PrivateKey, b64PublicKey, hexEncodedPrivateKey, hexEncodedPublicKey, biscuitPrivateKey } from "./utils/keygen.js";
+import { biscuit, block, authorizer, Biscuit, KeyPair, Fact, PrivateKey, BiscuitBuilder } from '@biscuit-auth/biscuit-wasm';
 import Utils from './utils/utils-functions.js';
+import SQLOperation from './BiscuitConstants.js';	
+import cron from 'node-cron'
 
 export default class SpaceAndTimeSDK {
     constructor() {
@@ -140,6 +143,10 @@ export default class SpaceAndTimeSDK {
         // Writing values of Public and Private key to ENV.
         this.setEnvValue("PUBLICKEY", publicKey);
         this.setEnvValue("PRIVATEKEY", privateKey);
+
+        cron.schedule(`*/25 * * * *`, async () => {
+            await this.refreshToken();
+        })
 
         return [ tokenResponse, tokenError ];   
     }
@@ -287,7 +294,6 @@ export default class SpaceAndTimeSDK {
     // Generate a new AccessToken and RefreshToken from the provided `refreshToken`
     async refreshToken() {
         try {
-
             let tokens = this.retrieveFileContents();
             let refreshToken = tokens.refreshToken;
 
@@ -518,6 +524,59 @@ export default class SpaceAndTimeSDK {
         return sqlText + " WITH \"public_key=" + publicKey + ",access_type=" + accessType + "\""
     }
 
+    // Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
+    generateBiscuits = (privateKey, resourceIds, wildCardRequired = false, operations = []) => {
+
+        let biscuitTokens = [];
+        let resourceIdsContainer = resourceIds.map(resourceId => resourceId.toLowerCase())
+
+        if(wildCardRequired) {
+                for(let resourceId of resourceIdsContainer) {
+                    let biscuitBuilder = biscuit``;
+                    let wildcard = '*'
+
+                    let biscuitBlock = block`sxt:capability(${wildcard},${resourceId})`
+                    biscuitBuilder.merge(biscuitBlock)
+                    
+                    let wildCardBiscuitToken = biscuitBuilder.build(PrivateKey.fromString(privateKey)).toBase64();
+                    biscuitTokens.push(wildCardBiscuitToken)
+                }
+            }
+
+        else {
+
+            let biscuitOperations = {
+                "CREATE" : SQLOperation.CREATE.Value,
+                "ALTER" : SQLOperation.ALTER.Value,
+                "DROP": SQLOperation.DROP.Value,
+                "INSERT": SQLOperation.INSERT.Value,
+                "UPDATE": SQLOperation.UPDATE.Value,
+                "MERGE": SQLOperation.MERGE.Value,
+                "DELETE": SQLOperation.DELETE.Value,
+                "SELECT": SQLOperation.SELECT.Value
+            }
+            
+            let sqlOperations = [];
+            for(let operation of operations) {
+                sqlOperations.push(biscuitOperations[operation])
+            }
+
+            for(let resourceId of resourceIdsContainer) {
+                let biscuitBuilder = biscuit``;
+                for(let operation of sqlOperations) {
+                    let biscuitBlock = block`sxt:capability(${operation}, ${resourceId})`
+                    biscuitBuilder.merge(biscuitBlock)
+                }
+
+                let biscuitToken = biscuitBuilder.build(PrivateKey.fromString(privateKey)).toBase64()
+                biscuitTokens.push(biscuitToken)
+            }
+        }
+
+        return biscuitTokens
+    }
+
+
     // Creating a Schema
     async CreateSchema(sqlText, biscuitTokens=[], originApp="") {
         try {
@@ -525,6 +584,7 @@ export default class SpaceAndTimeSDK {
             let accessToken = tokens.accessToken;
 
             Utils.checkStringFormat(sqlText);
+            Utils.checkArrayFormat(biscuitTokens);
             sqlText = sqlText.toUpperCase();
 
             let payload = {
@@ -550,15 +610,16 @@ export default class SpaceAndTimeSDK {
 
     // DDL
     // Create a table with the given resourceId
-    async CreateTable(sqlText, accessType, publicKey, biscuit, biscuitTokens=[], originApp="") {
+    async CreateTable(sqlText, accessType, publicKey, biscuitTokens=[], originApp="") {
 
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkStringFormat(sqlText);
+            Utils.checkStringFormat(sqlText);   
             Utils.checkStringFormat(accessType);
+            Utils.checkArrayFormat(biscuitTokens);
 
             sqlText = sqlText.toUpperCase();
             
@@ -574,7 +635,6 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    Biscuit: biscuit,
                     originApp: originApp
                 }
             }
@@ -584,18 +644,22 @@ export default class SpaceAndTimeSDK {
 
         }
         catch(error){
-            return [ null, error.message ];
+            return [ null, error ];
         }
     }
 
-    // Alter and drop a table with the given resourceId
-    async DDL(sqlText, biscuit, biscuitTokens=[], originApp="") {
+    // Drop a table with the given resourceId
+    async DDL(sqlText, biscuitTokens=[], originApp="") {
         try {
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
+
+            Utils.checkStringFormat(sqlText);
+            Utils.checkArrayFormat(biscuitTokens);
+
             let payload = {
                 biscuits: biscuitTokens,
-                sqlText: sqlText
+                sqlText: sqlText.toUpperCase(),
             }
         
             let accessTokenValue = 'Bearer ' + accessToken; 
@@ -603,7 +667,6 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    Biscuit: biscuit,
                     originApp: originApp
                 }
             }
@@ -619,7 +682,7 @@ export default class SpaceAndTimeSDK {
 
     // DML
     // Perform insert, update, merge and delete with the given resourceId 
-    async DML(resourceId, sqlText, biscuit, biscuitTokens=[], originApp="") {
+    async DML(resourceId, sqlText, biscuitTokens=[], originApp="") {
 
         try {
 
@@ -628,6 +691,7 @@ export default class SpaceAndTimeSDK {
 
             Utils.checkPostgresIdentifier(resourceId);
             Utils.checkStringFormat(sqlText);
+            Utils.checkArrayFormat(biscuitTokens);
             
             let payload = {
                 biscuits: biscuitTokens,
@@ -640,7 +704,6 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    Biscuit: biscuit,
                     originApp: originApp
                 }
             }
@@ -657,7 +720,7 @@ export default class SpaceAndTimeSDK {
 
     //DQL
     // Perform selection with the given resourceId and if rowCount is 0 then the query will fetch all of the data
-    async DQL(resourceId, sqlText, biscuit, biscuitTokens=[], originApp="", rowCount = 0) { 
+    async DQL(resourceId, sqlText, biscuitTokens=[], originApp="", rowCount = 0) { 
 
         try {
 
@@ -666,6 +729,7 @@ export default class SpaceAndTimeSDK {
 
             Utils.checkPostgresIdentifier(resourceId);
             Utils.checkStringFormat(sqlText);
+            Utils.checkArrayFormat(biscuitTokens);
 
             let payload = {};
             if(rowCount > 0) {
@@ -689,7 +753,6 @@ export default class SpaceAndTimeSDK {
             let config = {
                 headers: {
                     Authorization: accessTokenValue,
-                    Biscuit: biscuit,
                     originApp: originApp
                 }
             }

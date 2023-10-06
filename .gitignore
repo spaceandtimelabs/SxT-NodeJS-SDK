@@ -91,6 +91,7 @@ lerna-debug.log
 Thumbs.db
 
 #Local Files
+biscuits.js
 MockSDK.js
 created-user-details.txt
 tester.js
