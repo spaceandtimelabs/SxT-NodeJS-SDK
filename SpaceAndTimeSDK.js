@@ -721,7 +721,6 @@ export default class SpaceAndTimeSDK {
     //DQL
     // Perform selection with the given resourceId and if rowCount is 0 then the query will fetch all of the data
     async DQL(resourceId, sqlText, biscuitTokens=[], originApp="", rowCount = 0) { 
-
         try {
 
             let tokens = this.retrieveFileContents();
@@ -730,7 +729,6 @@ export default class SpaceAndTimeSDK {
             Utils.checkPostgresIdentifier(resourceId);
             Utils.checkStringFormat(sqlText);
             Utils.checkArrayFormat(biscuitTokens);
-
             let payload = {};
             if(rowCount > 0) {
                 payload = {
@@ -756,12 +754,14 @@ export default class SpaceAndTimeSDK {
                     originApp: originApp
                 }
             }
-
-            const response = await axios.post(`${this.baseUrl}/sql/dql`, payload, config);
+            
+            let response = await axios.post(`${this.baseUrl}/sql/dql`, payload, config);
             return [ response.data, null ];
         }
         catch(error) {
-            return [ null, error.message ];
+            let main_error_message = JSON.parse(JSON.stringify(error.response.data))
+            let title = main_error_message["title"], detail = main_error_message["detail"].split("\n").slice(0,3).join("\n").replace(/(\S)\n(\S)/g, "$1 $2");
+            return [ null, title + " : " + detail + "\n" + error.message ];
         }
     }
 

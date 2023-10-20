@@ -1,6 +1,6 @@
 {
   "name": "nodesdk-sxt",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "An SDK to easily interact with Space and Time",
   "main": "SpaceAndTimeSDK.js",
