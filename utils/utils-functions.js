@@ -6,7 +6,7 @@ function checkUserIdFormat(userId) {
 }
 
 function checkStringFormat(userString) {
-    if(userString.length === 0) {
+    if(userString == undefined || userString.length === 0 || userString == null) {
         throw new Error('Empty String provided.')
     }
     else if(typeof userString !== 'string') {
@@ -44,6 +44,25 @@ function checkPostgresIdentifier(resourceId) {
     throw new Error(`${INVALID_RESOURCEID}: Either schema or table identifier is invalid`);
   }
   return { schemaName, tableName };
+}
+
+function checkPostGresIdentifiers(resources) {
+  // if(resources == null || resources.length == 0) throw new Error(`No resources provided.`)
+  const results = [];
+  for (let i = 0; i < resources.length; i++) {
+    const resourceId = resources[i];
+    try {
+      const { schemaName, tableName } = checkPostgresIdentifier(resourceId);
+      results.push({ schemaName, tableName, valid: true });
+    } catch (error) {
+      results.push({ resourceId, error: error.message, valid: false });
+    }
+  }
+
+  let areResultsValid = results.every(result => result.valid);
+  if(!areResultsValid) {
+    throw new Error(`Invalid Resources provided - ${resources}`);
+  }
 }
 
 function checkBooleanFormat(userBoolean) {
@@ -91,17 +110,34 @@ function checkSignature(signature) {
     return regex.test(signature);
 }
 
+function checkApiVersion(url) {
+  const regex = /\/v\d\//;
+  const match = url.match(regex);
+
+  if (!match) {
+    throw new Error('No version found in API url');
+  }
+
+  const version = match[0];
+
+  if (version !== '/v2/') {
+    throw new Error('For this endpoint, The API version must be v2 and not v1.'); 
+  }
+}
+
 let Utils = {
     checkUserIdFormat,
     checkStringFormat,
     checkArrayFormat,
     checkPostgresIdentifier,
+    checkPostGresIdentifiers,
     checkBooleanFormat,
     checkIsSameUrl,
     checkPrefixAndJoinCode,
     checkSignature,
     isBase64,
     isHexString,
+    checkApiVersion
 }   
 
 

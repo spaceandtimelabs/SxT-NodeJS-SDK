@@ -347,15 +347,39 @@ export default class SpaceAndTimeSDK {
         }
     }
 
+    #updateUrlVersion = (apiUrl) => {
+        const newVersion = "v2"
+        const urlParts = apiUrl.split("/")
+        urlParts[urlParts.length-1] = newVersion
+        return urlParts.join("/");
+    }
 
     /* Discovery APIs */
 
-    // Fetch the namespace metadata
-    async getNameSpaces() {
-        try {
-
+    // Fetch the schema metadata
+    async getSchemas(scope="", schema="") {
+        try {        
+            let v2versionURL = this.#updateUrlVersion(this.baseUrl)
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
+            let endpoint = null;
+
+            if(scope == "" && schema == "") {
+                endpoint = `${v2versionURL}/discover/schema`;
+            }
+            else if(scope != "" && schema == "") {
+                endpoint = `${v2versionURL}/discover/schema?scope=${scope}`;
+            }
+            else {
+                Utils.checkStringFormat(scope);
+                Utils.checkStringFormat(schema);
+    
+                scope = scope.toUpperCase();
+                schema = schema.toUpperCase();
+                endpoint = `${v2versionURL}/discover/schema?scope=${scope}&searchPattern=${schema}`
+            }
+
+            Utils.checkApiVersion(endpoint);
 
             let accessTokenValue = `Bearer ${accessToken}`; 
             let config = {
@@ -364,7 +388,7 @@ export default class SpaceAndTimeSDK {
                 }
             }
 
-            const response = await axios.get(`${this.baseUrl}/discover/namespace`, config);
+            const response = await axios.get(endpoint, config);
             return [ response.data, null ];
         }
         catch(error)
@@ -374,17 +398,29 @@ export default class SpaceAndTimeSDK {
     }
 
     // Fetch Table column metadata    
-    async getTables(scope, namespace) {
+    async getTables(scope, schema, table="") {
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
-
+            let v2versionURL = this.#updateUrlVersion(this.baseUrl);
+            let endpoint = null;
+            
             Utils.checkStringFormat(scope);
-            Utils.checkPostgresIdentifier(namespace);
+            Utils.checkPostgresIdentifier(schema);
 
             scope = scope.toUpperCase();
-            namespace = namespace.toUpperCase();
+            schema = schema.toUpperCase();
+            
+            if(table == "") {
+                endpoint = `${v2versionURL}/discover/table?scope=${scope}&schema=${schema}`
+            }
+            else {
+                table = table.toUpperCase();
+                endpoint = `${v2versionURL}/discover/table?scope=${scope}&schema=${schema}&searchPattern=${table}`
+            }
+
+            Utils.checkApiVersion(endpoint);
 
             let accessTokenValue = `Bearer ${accessToken}`; 
             let config = {
@@ -393,25 +429,26 @@ export default class SpaceAndTimeSDK {
                 }
             }
 
-            const response = await axios.get(`${this.baseUrl}/discover/table?scope=${scope}&namespace=${namespace}`, config);
+            const response = await axios.get(endpoint, config);
             return [ response.data, null ];
         }
         catch(error)
         {
-            return [`${this.baseUrl}/discover/table?scope=${scope}&namespace=${namespace}`, error.message ];
+            return [null, error.message ];
         }
     }
  
-    async discoveryAPIRequest(namespace, tableName, endpoint) {
+    async #discoveryAPIRequest(schema, tableName, endpoint) {
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkPostgresIdentifier(namespace);
+            Utils.checkPostgresIdentifier(schema);
             Utils.checkPostgresIdentifier(tableName);
+            Utils.checkApiVersion(endpoint);
     
-            namespace = namespace.toUpperCase();
+            schema = schema.toUpperCase();
             tableName = tableName.toUpperCase();
     
             let accessTokenValue = `Bearer ${accessToken}`; 
@@ -430,34 +467,38 @@ export default class SpaceAndTimeSDK {
     }
 
     // Fetch Table column metadata
-    async getTableColumns(namespace, tableName) {
-        let endpoint = `${this.baseUrl}/discover/table/column?namespace=${namespace}&table=${tableName}`;
-        return await this.discoveryAPIRequest(namespace, tableName, endpoint);
+    async getTableColumns(schema, tableName) {
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl)
+        let endpoint = `${v2versionURL}/discover/table/column?schema=${schema}&table=${tableName}`;
+        return await this.#discoveryAPIRequest(schema, tableName, endpoint);
     }
 
     // Fetch tables index metadata
-    async getTableIndexes(namespace, tableName) {
-        let endpoint = `${this.baseUrl}/discover/table/index?namespace=${namespace}&table=${tableName}`
-        return await this.discoveryAPIRequest(namespace, tableName, endpoint);
+    async getTableIndexes(schema, tableName) {
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl)
+        let endpoint = `${v2versionURL}/discover/table/index?schema=${schema}&table=${tableName}`
+        return await this.#discoveryAPIRequest(schema, tableName, endpoint);
     }
 
     // Fetch table primary key metadata
-    async getPrimaryKeys(namespace, tableName) {
-        let endpoint = `${this.baseUrl}/discover/table/primaryKey?namespace=${namespace}&table=${tableName}`;
-        return await this.discoveryAPIRequest(namespace, tableName, endpoint);
+    async getPrimaryKeys(schema, tableName) {
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl)
+        let endpoint = `${v2versionURL}/discover/table/primaryKey?schema=${schema}&table=${tableName}`;
+        return await this.#discoveryAPIRequest(schema, tableName, endpoint);
     }
 
-    async discoveryAPIReferencesRequest(namespace, tableName, column, endpoint) {
+    async #discoveryAPIReferencesRequest(schema, tableName, column, endpoint) {
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkPostgresIdentifier(namespace);
+            Utils.checkPostgresIdentifier(schema);
             Utils.checkPostgresIdentifier(tableName);
             Utils.checkStringFormat(column);
+            Utils.checkApiVersion(endpoint);
 
-            namespace = namespace.toUpperCase();
+            schema = schema.toUpperCase();
             tableName = tableName.toUpperCase();
             column = column.toUpperCase();
 
@@ -477,28 +518,31 @@ export default class SpaceAndTimeSDK {
     }
 
     // Fetch all primary keys referenced by a provided foreign key
-    async getPrimaryKeyReferences(namespace, tableName, column) {
-        let endpoint = `${this.baseUrl}/discover/refs/primarykey?table=${tableName}&namespace=${namespace}&column=${column}`;
-        return await this.discoveryAPIReferencesRequest(namespace, tableName, column, endpoint);
+    async getPrimaryKeyReferences(schema, tableName, column) {
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl);
+        let endpoint = `${v2versionURL}/discover/refs/primarykey?schema=${schema}&table=${tableName}&column=${column}`;
+        return await this.#discoveryAPIReferencesRequest(schema, tableName, column, endpoint);
     }
 
     // Fetch all foreign key referencing the provided primary key
-    async getForeignKeyReferences(namespace, tableName, column) {
-        let endpoint = `${this.baseUrl}/discover/refs/foreignkey?table=${tableName}&namespace=${namespace}&column=${column}`
-        return await this.discoveryAPIReferencesRequest(namespace, tableName, column, endpoint);
+    async getForeignKeyReferences(schema, tableName, column) {
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl)
+        let endpoint = `${v2versionURL}/discover/refs/foreignkey?schema=${schema}&table=${tableName}&column=${column}`
+        return await this.#discoveryAPIReferencesRequest(schema, tableName, column, endpoint);
     }
 
-    // Fetch table relationship metadata for tables in a namespace
-    async getTableRelationships(namespace, scope) {
+    // Fetch table relationship metadata for tables in a schema
+    async getTableRelationships(schema, scope) {
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
+            let v2versionURL = this.#updateUrlVersion(this.baseUrl)
 
-            Utils.checkPostgresIdentifier(namespace);
+            Utils.checkPostgresIdentifier(schema);
             Utils.checkStringFormat(scope);
 
-            namespace = namespace.toUpperCase();
+            schema = schema.toUpperCase();
             scope = scope.toUpperCase();    
 
             let accessTokenValue = `Bearer ${accessToken}`; 
@@ -508,7 +552,7 @@ export default class SpaceAndTimeSDK {
                 }
             }
 
-            const response = await axios.get(`${this.baseUrl}/discover/table/relations?namespace=${namespace}&scope=${scope}`, config);
+            const response = await axios.get(`${v2versionURL}/discover/table/relations?scope=${scope}&schema=${schema}`, config);
             return [ response.data, null ];
 
         }
@@ -518,7 +562,85 @@ export default class SpaceAndTimeSDK {
         }
     }    
 
+    /* Blockchain APIs */
+
+    async #blockchainDataAPIRequest(url, chainId="") {
+        try {
+            Utils.checkApiVersion(url);
+            let tokens = this.retrieveFileContents();
+            let accessToken = tokens.accessToken;
+
+            if (chainId !== "") {
+                Utils.checkStringFormat(chainId);
+            }
+
+            let accessTokenValue = `Bearer ${accessToken}`;
+            let config = {
+                headers: {
+                    Authorization: accessTokenValue
+                }
+            }
+
+            let response = await axios.get(url, config);
+            return [response.data, null];
+
+        }
+        catch(error) {
+            return [ null, error.message ];
+        }
+    }
+
+    // Retrieve Space and Time supported Blockchains
+    async getBlockchains() {
+
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl);
+        let endpoint = `${v2versionURL}/discover/blockchains`;
+        return await this.#blockchainDataAPIRequest(endpoint);
+
+    }
+
+    // Retrieve all the schemas for the provided blockchain (chainId)
+    async getBlockchainSchemas(chainId) {
+
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl);
+        let endpoint = `${v2versionURL}/discover/blockchains/${chainId}/schemas`;
+        return await this.#blockchainDataAPIRequest(endpoint, chainId);
+
+    }
+
+    // Retrieve the metadata for the provided blockchain (chainId)
+    async getBlockchainInformation(chainId) {
+
+        let v2versionURL = this.#updateUrlVersion(this.baseUrl);
+        let endpoint = `${v2versionURL}/discover/blockchains/${chainId}/meta`;
+        return await this.#blockchainDataAPIRequest(endpoint, chainId);
+
+    }
+
     /* Core SQL APIs */
+
+    // Parses the error messages returned by the gateway appropriately
+    #parseSQLErrorMessage = (error) => {
+        if (error.toString().startsWith('Error')) {
+          return [ null, error ];
+        }
+      
+        let main_error_message = null;
+        try {
+          main_error_message = JSON.parse(JSON.stringify(error.response.data));
+        } catch (error) {
+          return [ null, error.message ];
+        }
+      
+        let title = main_error_message["title"];
+        let detail = main_error_message["detail"]
+          .split("\n")
+          .slice(0, 3)
+          .join("\n")
+          .replace(/(\S)\n(\S)/g, "$1 $2");
+      
+        return [null, title + " : " + detail + "\n" + error.message];
+      }
 
     convertSQLText = (sqlText, publicKey, accessType) => {
         return sqlText + " WITH \"public_key=" + publicKey + ",access_type=" + accessType + "\""
@@ -527,53 +649,64 @@ export default class SpaceAndTimeSDK {
     // Generates Biscuits given the resourceID and Private Key which is hex encoded and length 64.
     generateBiscuits = (privateKey, resourceIds, wildCardRequired = false, operations = []) => {
 
-        let biscuitTokens = [];
-        let resourceIdsContainer = resourceIds.map(resourceId => resourceId.toLowerCase())
+        try {
 
-        if(wildCardRequired) {
+            Utils.checkStringFormat(privateKey)
+            Utils.checkArrayFormat(resourceIds)
+            Utils.checkBooleanFormat(wildCardRequired)
+            Utils.checkArrayFormat(operations);
+
+            let biscuitTokens = [];
+            let resourceIdsContainer = resourceIds.map(resourceId => resourceId.toLowerCase())
+
+            if(wildCardRequired) {
+                    for(let resourceId of resourceIdsContainer) {
+                        let biscuitBuilder = biscuit``;
+                        let wildcard = '*'
+
+                        let biscuitBlock = block`sxt:capability(${wildcard},${resourceId})`
+                        biscuitBuilder.merge(biscuitBlock)
+                        
+                        let wildCardBiscuitToken = biscuitBuilder.build(PrivateKey.fromString(privateKey)).toBase64();
+                        biscuitTokens.push(wildCardBiscuitToken)
+                    }
+                }
+
+            else {
+
+                let biscuitOperations = {
+                    "CREATE" : SQLOperation.CREATE.Value,
+                    "ALTER" : SQLOperation.ALTER.Value,
+                    "DROP": SQLOperation.DROP.Value,
+                    "INSERT": SQLOperation.INSERT.Value,
+                    "UPDATE": SQLOperation.UPDATE.Value,
+                    "MERGE": SQLOperation.MERGE.Value,
+                    "DELETE": SQLOperation.DELETE.Value,
+                    "SELECT": SQLOperation.SELECT.Value
+                }
+                
+                let sqlOperations = [];
+                for(let operation of operations) {
+                    sqlOperations.push(biscuitOperations[operation])
+                }
+
                 for(let resourceId of resourceIdsContainer) {
                     let biscuitBuilder = biscuit``;
-                    let wildcard = '*'
+                    for(let operation of sqlOperations) {
+                        let biscuitBlock = block`sxt:capability(${operation}, ${resourceId})`
+                        biscuitBuilder.merge(biscuitBlock)
+                    }
 
-                    let biscuitBlock = block`sxt:capability(${wildcard},${resourceId})`
-                    biscuitBuilder.merge(biscuitBlock)
-                    
-                    let wildCardBiscuitToken = biscuitBuilder.build(PrivateKey.fromString(privateKey)).toBase64();
-                    biscuitTokens.push(wildCardBiscuitToken)
+                    let biscuitToken = biscuitBuilder.build(PrivateKey.fromString(privateKey)).toBase64()
+                    biscuitTokens.push(biscuitToken)
                 }
             }
 
-        else {
-
-            let biscuitOperations = {
-                "CREATE" : SQLOperation.CREATE.Value,
-                "ALTER" : SQLOperation.ALTER.Value,
-                "DROP": SQLOperation.DROP.Value,
-                "INSERT": SQLOperation.INSERT.Value,
-                "UPDATE": SQLOperation.UPDATE.Value,
-                "MERGE": SQLOperation.MERGE.Value,
-                "DELETE": SQLOperation.DELETE.Value,
-                "SELECT": SQLOperation.SELECT.Value
-            }
-            
-            let sqlOperations = [];
-            for(let operation of operations) {
-                sqlOperations.push(biscuitOperations[operation])
-            }
-
-            for(let resourceId of resourceIdsContainer) {
-                let biscuitBuilder = biscuit``;
-                for(let operation of sqlOperations) {
-                    let biscuitBlock = block`sxt:capability(${operation}, ${resourceId})`
-                    biscuitBuilder.merge(biscuitBlock)
-                }
-
-                let biscuitToken = biscuitBuilder.build(PrivateKey.fromString(privateKey)).toBase64()
-                biscuitTokens.push(biscuitToken)
-            }
+            return [ biscuitTokens, null ];
         }
-
-        return biscuitTokens
+        catch(error) {
+            return [ null, error];
+        }
     }
 
 
@@ -619,7 +752,6 @@ export default class SpaceAndTimeSDK {
 
             Utils.checkStringFormat(sqlText);   
             Utils.checkStringFormat(accessType);
-            Utils.checkArrayFormat(biscuitTokens);
 
             sqlText = sqlText.toUpperCase();
             
@@ -682,20 +814,20 @@ export default class SpaceAndTimeSDK {
 
     // DML
     // Perform insert, update, merge and delete with the given resourceId 
-    async DML(resourceId, sqlText, biscuitTokens=[], originApp="") {
+    async DML(resources, sqlText, biscuitTokens=[], originApp="") {
 
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkPostgresIdentifier(resourceId);
+            Utils.checkPostGresIdentifiers(resources);
             Utils.checkStringFormat(sqlText);
             Utils.checkArrayFormat(biscuitTokens);
             
             let payload = {
                 biscuits: biscuitTokens,
-                resourceId: resourceId.toUpperCase(),
+                resources: resources,
                 sqlText: sqlText
             }
 
@@ -714,26 +846,27 @@ export default class SpaceAndTimeSDK {
         }
 
         catch(error) {
-            return [ null, error.message ];
+            return this.#parseSQLErrorMessage(error);
         }
     }
 
     //DQL
     // Perform selection with the given resourceId and if rowCount is 0 then the query will fetch all of the data
-    async DQL(resourceId, sqlText, biscuitTokens=[], originApp="", rowCount = 0) { 
+    async DQL(resources, sqlText, biscuitTokens=[], originApp="", rowCount = 0) { 
         try {
 
             let tokens = this.retrieveFileContents();
             let accessToken = tokens.accessToken;
 
-            Utils.checkPostgresIdentifier(resourceId);
+            Utils.checkPostGresIdentifiers(resources);
             Utils.checkStringFormat(sqlText);
             Utils.checkArrayFormat(biscuitTokens);
+
             let payload = {};
             if(rowCount > 0) {
                 payload = {
                     biscuits: biscuitTokens,
-                    resourceId: resourceId.toUpperCase(),
+                    resources:resources,
                     sqlText: sqlText,
                     rowCount: rowCount
                 }
@@ -741,7 +874,7 @@ export default class SpaceAndTimeSDK {
             else {
                 payload = {
                 biscuits: biscuitTokens,
-                resourceId: resourceId.toUpperCase(),
+                resources: resources,
                 sqlText: sqlText
                }
             }
@@ -759,9 +892,7 @@ export default class SpaceAndTimeSDK {
             return [ response.data, null ];
         }
         catch(error) {
-            let main_error_message = JSON.parse(JSON.stringify(error.response.data))
-            let title = main_error_message["title"], detail = main_error_message["detail"].split("\n").slice(0,3).join("\n").replace(/(\S)\n(\S)/g, "$1 $2");
-            return [ null, title + " : " + detail + "\n" + error.message ];
+            return this.#parseSQLErrorMessage(error);
         }
     }
 

@@ -86,44 +86,44 @@ console.log(logoutResponse, logoutError);
 let accessTokenValue = accessToken;
 
 let scope = "ALL";
-let namespace = "ETHEREUM";
+let schema = "ETHEREUM";
 let owned = true;
 let column = "BLOCK_NUMBER";
 let tableName = "FUNGIBLETOKEN_WALLET";
 
 /** Calls to Discovery APIs **/
 
-// List the NameSpaces
-let [getNameSpaceResponse, getNameSpaceError] =  await initSDK.getNameSpaces();
-console.log(getNameSpaceResponse, getNameSpaceError);
+// List the Schemas
+let [getSchemaResponse, getSchemaError] =  await initSDK.getSchemas();
+console.log(getSchemaResponse, getSchemaError);
 
-// List the Tables of a given NameScape
+// List the Tables of a given Schema
 // Scope value Options - ALL = all tables, PUBLIC = non-permissioned tables, PRIVATE = tables created by requesting user
-let [getTableResponse, getTableError] = await initSDK.getTables(scope,namespace);
+let [getTableResponse, getTableError] = await initSDK.getTables(scope,schema);
 console.log(getTableResponse, getTableError);
 
 // List Table Column MetaData
-let [getTableColumnResponse, getTableColumnError] = await initSDK.getTableColumns(namespace, tableName);
+let [getTableColumnResponse, getTableColumnError] = await initSDK.getTableColumns(schema, tableName);
 console.log(getTableColumnResponse, getTableColumnError);
 
 // List Table Index MetaData
-let [getTableIndexesResponse, getTableIndexesError] = await initSDK.getTableIndexes(namespace, tableName);
+let [getTableIndexesResponse, getTableIndexesError] = await initSDK.getTableIndexes(schema, tableName);
 console.log(getTableIndexesResponse, getTableIndexesError);
 
 // List Table Primary MetaData
-let [getPrimaryKeyResponse, getPrimaryKeyError] = await initSDK.getPrimaryKeys(namespace, tableName);
+let [getPrimaryKeyResponse, getPrimaryKeyError] = await initSDK.getPrimaryKeys(schema, tableName);
 console.log(getPrimaryKeyResponse, getPrimaryKeyError);
 
-// List Table Relationship MetaData including table, column, and primary key references for all tables of a namespace
-let [tableRelationshipResponse, tableRelationshipError] = await initSDK.getTableRelationships(namespace, scope);
+// List Table Relationship MetaData including table, column, and primary key references for all tables of a schema
+let [tableRelationshipResponse, tableRelationshipError] = await initSDK.getTableRelationships(schema, scope);
 console.log(tableRelationshipResponse, tableRelationshipError);
 
 // List all Primary Key References by the provided foreign key reference.
-let [primaryKeyReferenceResponse, primaryKeyReferenceError] = await initSDK.getPrimaryKeyReferences(namespace, tableName, column);
+let [primaryKeyReferenceResponse, primaryKeyReferenceError] = await initSDK.getPrimaryKeyReferences(schema, tableName, column);
 console.log(primaryKeyReferenceResponse, primaryKeyReferenceError);
 
 // List all Foreign Key References referencing the provided primary key.
-let [foreignKeyReferenceResponse, foreignKeyReferenceError] = await initSDK.getForeignKeyReferences(namespace, tableName, column);
+let [foreignKeyReferenceResponse, foreignKeyReferenceError] = await initSDK.getForeignKeyReferences(schema, tableName, column);
 console.log(foreignKeyReferenceResponse, foreignKeyReferenceError);
 
 /** Calls to CoreSQL APIs **/
@@ -140,11 +140,11 @@ let dropSqlText = "DROP TABLE ETH.TESTETH12"
 let insertSqlText = "INSERT INTO ETH.TESTETH12 VALUES(4, 'x4')"
 let selectSqlStatement = "SELECT * FROM ETH.TESTETH12"
 
-let resourceId = "ETH.TESTETH12";
+let resources = ["ETH.TESTETH12"];
 
 // Generate Biscuits
-let biscuitsGenerated = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "ALTER", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]);
-console.log(biscuitsGenerated)
+let [ biscuitArrayResponse, biscuitArrayError ] = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["SELECT", "INSERT", "UPDATE", "DELETE"]);
+console.log(biscuitArrayResponse, biscuitArrayError)
 
 // Create a Schema
 let [ createSchemaResponse, createSchemaError ] = await initSDK.CreateSchema(createSchemaSQLText);
@@ -163,15 +163,30 @@ console.log(DDLresponse, DDLerror);
 // DML
 
 // Can be used to insert, update, delete and merge
-let [DMLResponse, DMLError] = await initSDK.DML(resourceId, insertSqlText, biscuitArray);
+let [DMLResponse, DMLError] = await initSDK.DML(resources, insertSqlText, biscuitArray);
 console.log(DMLResponse, DMLError);
 
 // DQL
 
 // Can be used to select
 // Selects all if rowCount = 0
-let [DQLResponse, DQLError] = await initSDK.DQL(resourceId, selectSqlStatement, biscuitArray);
+let [DQLResponse, DQLError] = await initSDK.DQL(resources, selectSqlStatement, biscuitArray);
 console.log(DQLResponse, DQLError);
+
+/** Calls to Blockchain **/
+let chainId = "ETHEREUM" // Blockchain
+
+// Get blockchains supported by the platform
+let [ getBlockchainResponse, getBlockchainError ] = await initSDK.getBlockchains();
+console.log(getBlockchainResponse, getBlockchainError)
+
+// Get schemas for the provided blockchain
+let [ getBlockchainSchemasResponse, getBlockchainSchemasError ] = await initSDK.getBlockchainSchemas(chainId)
+console.log(getBlockchainSchemasResponse, getBlockchainSchemasError);
+
+// Get Metadata for the provided blockchain
+let [ getBlockchainInformationResponse, getBlockchainInformationError ] = await initSDK.getBlockchainInformation(chainId);
+console.log(getBlockchainInformationResponse, getBlockchainInformationError);
 
 /** Calls to Views **/
 
@@ -182,7 +197,7 @@ let parametersRequest = [
     }
 ]
 
-resourceId = "ETH.BLOCK"
+let resourceId = "ETH.BLOCK"
 let viewText = "SELECT * FROM ETH.BLOCK WHERE BLOCK_NUMBER = {{BLOCK_NUMBER}} "
 let viewName = "block-view-js1"; //block-view-last-1
 let description = "display blocks by their block_number";

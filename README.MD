@@ -35,7 +35,7 @@ It supports ED25519 Public key encryption for Biscuit Authorization and securing
 
 - **Platform Discovery**
  For fetching metadata and information about the database resources.
-	 - Namespaces
+	 - Schemas
 	 - Tables
 	 - Table Columns
 	 - Table Indexes
@@ -43,6 +43,12 @@ It supports ED25519 Public key encryption for Biscuit Authorization and securing
 	 - Table Relationships
 	 - Table Primary Key References
 	 - Table Foreign Key References
+
+- **Platform Blockchain**
+ For fetching blockchain metadata and information
+	- Blockchains
+	- Blockchain Schemas
+	- Blockchain Information
 
 
 ## Examples
@@ -77,7 +83,10 @@ Sample biscuit generation with permissions for `select query`,`insert query`, `u
 	Specifying True in the function will give you a wildcard biscuit with all of the permissions.
 
 ```js
-let biscuitArray = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["CREATE", "DROP", "INSERT", "UPDATE", "MERGE", "DELETE", "SELECT"]);
+	let [ biscuitArrayResponse, biscuitArrayError ] = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRACTS", "ETHEREUM.TRANSACTIONS"], false, ["SELECT", "INSERT", "UPDATE", "DELETE"]);
+	
+	console.log('Response: ', biscuitArrayResponse);
+	console.log('Error: ', biscuitArrayError);
 ```
 
 - **DDL, DML and DQL**
@@ -101,20 +110,20 @@ let biscuitArray = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRA
 	console.log('Error: ', CreateTableError)
 
 	// For DROP
-	let [DDLresponse, DDLerror] =  await initSDK.DDL("DROP TABLE ETH.TESTTABLE", biscuit);
+	let [DDLresponse, DDLerror] =  await initSDK.DDL("DROP TABLE ETH.TESTTABLE", biscuitArray);
 
 	console.log('Response: ', DDLresponse)
 	console.log('Error: ', DDLerror)
 
 	// DML 
 	// Use DML() to insert, update, delete and merge queries
-	let [DMLResponse, DMLError] =  await initSDK.DML("ETH.TESTTABLE", "INSERT INTO ETH.TESTTABLE VALUES(5, 'X5')", biscuitArray);
+	let [DMLResponse, DMLError] =  await initSDK.DML(["ETH.TESTTABLE"], "INSERT INTO ETH.TESTTABLE VALUES(5, 'X5')", biscuitArray);
 
 	console.log('Response: ', DMLResponse)
 	console.log('Error: ', DMLError)
 
 	// DQL for selecting content from the blockchain tables.
-	let [DQLResponse, DQLError] =  await initSDK.DQL("ETH.TESTTABLE", "SELECT * FROM ETH.TESTTABLE", biscuitArray);
+	let [DQLResponse, DQLError] =  await initSDK.DQL(["ETH.TESTTABLE"], "SELECT * FROM ETH.TESTTABLE", biscuitArray);
 
 	console.log('Response: ', DQLResponse)
 	console.log('Error: ', DQLError)
@@ -125,54 +134,80 @@ let biscuitArray = initSDK.generateBiscuits(biscuitPrivateKey, ["ETHEREUM.CONTRA
 	Discovery SDK calls need a user to be logged in.
 
 ```js
-	// List Namespaces
-	let [getNameSpaceResponse, getNameSpaceError] =  await initSDK.getNameSpaces();
+	// List Schemas
+	let [getSchemaResponse, getSchemaError] =  await initSDK.getSchemas();
 
-	console.log('Response: ', getNameSpaceResponse)
-	console.log('Error: ', getNameSpaceError)
+	console.log('Response: ', getSchemaResponse)
+	console.log('Error: ', getSchemaError)
 
-	// List Tables in a given namespace
+	// List Tables in a given schema
 	// Possible scope values - ALL = all tables, PUBLIC = non-permissioned tables, PRIVATE = tables created by a requesting user
 	let [getTableResponse, getTableError] =  await initSDK.getTables("ALL","ETH");
 
 	console.log('Response: ', getTableResponse)
 	console.log('Error: ', getTableError)
 
-	// List columns for a given table in a namespace
+	// List columns for a given table in a schema
 	let [getTableColumnResponse, getTableColumnError] =  await initSDK.getTableColumns("ETH","TESTTABLE");
 
 	console.log('Response: ', getTableColumnResponse)
 	console.log('Error: ', getTableColumnError)
 
-	// List table index for a given table in a namespace
+	// List table index for a given table in a schema
 	let [getTableIndexesResponse, getTableIndexesError] =  await initSDK.getTableIndexes("ETH","TESTTABLE");
 
 	console.log('Response: ', getTableIndexesResponse)
 	console.log('Error: ', getTableIndexesError)
 
-	// List table primary key for a given table in a namespace
+	// List table primary key for a given table in a schema
 	let [getPrimaryKeyResponse, getPrimaryKeyError] =  await initSDK.getPrimaryKeys("ETH", "TESTTABLE");
 
 	console.log('Response: ', getPrimaryKeyResponse)
 	console.log('Error: ', getPrimaryKeyError)
 
-	// List table relations for a namespace and scope
+	// List table relations for a schema and scope
 	let [tableRelationshipResponse, tableRelationshipError] =  await initSDK.getTableRelationships("ETH", "PRIVATE");
 
 	console.log('Response: ', tableRelationshipResponse)
 	console.log('Error: ', tableRelationshipError)
 
-	// List table primary key references for a table, column and a namespace
+	// List table primary key references for a table, column and a schema
 	let [primaryKeyReferenceResponse, primaryKeyReferenceError] =  await initSDK.getPrimaryKeyReferences("ETH", "TESTTABLE", "TEST");
 
 	console.log('Response: ', primaryKeyReferenceResponse)
 	console.log('Error: ', primaryKeyReferenceError)
 
-	// List table foreign key references for a table, column and a namespace
+	// List table foreign key references for a table, column and a schema
 	let [foreignKeyReferenceResponse, foreignKeyReferenceError] =  await initSDK.getForeignKeyReferences("ETH", "TESTTABLE", "TEST");
 
 	console.log('Response: ', foreignKeyReferenceResponse)
 	console.log('Error: ', foreignKeyReferenceError)
+```
+
+- **Blockchain**
+
+	For retrieving platform specific blockchain information and metadata
+	
+```js
+
+	// Get the blockchains supported by the platform
+	let [ getBlockchainResponse, getBlockchainError ] = await initSDK.getBlockchains();
+
+	console.log('Response: ', getBlockchainResponse)
+	console.log('Error: ', getBlockchainError)
+
+	// Get schemas for the provided blockchain
+	let [ getBlockchainSchemasResponse, getBlockchainSchemasError ] = await initSDK.getBlockchainSchemas("ETHEREUM");
+
+	console.log('Response: ', getBlockchainSchemasResponse);
+	console.log('Error: ', getBlockchainSchemasError);
+
+	// Get Metadata Information for the provided blockchain
+	let [ getBlockchainInformationResponse, getBlockchainInformationError ] = await initSDK.getBlockchainInformation("ETHEREUM");
+
+	console.log('Response: ', getBlockchainInformationResponse);
+	console.log('Error: ', getBlockchainInformationError);
+
 ```
 
 -   **Storage**
