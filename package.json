@@ -1,24 +1,31 @@
 {
-  "name": "nodesdk-sxt",
-  "version": "1.0.1",
-  "type": "module",
-  "description": "An SDK to easily interact with Space and Time",
-  "main": "SpaceAndTimeSDK.js",
-  "scripts": {
-    "start": "node --experimental-wasm-modules examples.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@biscuit-auth/biscuit-wasm": "^0.4.0-alpha3",
-    "axios": "^1.3.4",
-    "base64-js": "^1.5.1",
-    "base64url": "^3.0.1",
-    "crypto-js": "^4.1.1",
-    "dotenv": "^16.0.3",
-    "node-cron": "^3.0.2",
-    "tweetnacl": "^1.0.3"
-  }
+    "name": "sxt-nodejs-sdk",
+    "version": "0.0.3",
+    "type": "module",
+    "description": "An SDK to easily interact with Space and Time",
+    "main": "src/index.ts",
+    "scripts": {
+        "start": "tsc  && node ./dist/index.js",
+        "start-old": "node --experimental-wasm-modules examples.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@biscuit-auth/biscuit-wasm": "^0.4.0",
+        "@noble/ed25519": "^2.1.0",
+        "axios": "^1.3.4",
+        "base64-js": "^1.5.1",
+        "base64url": "^3.0.1",
+        "crypto-js": "^4.1.1",
+        "dotenv": "^16.0.3",
+        "node-cron": "^3.0.2",
+        "tweetnacl": "^1.0.3"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.10",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.4.5"
+    }
 }
