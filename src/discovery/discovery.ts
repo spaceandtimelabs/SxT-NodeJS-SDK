@@ -20,22 +20,21 @@ export default class DiscoveryAPI {
         scope?: string,
         searchPattern?: string
     ): Promise<Types.APIResponse> => {
-        let endpoint: string = "/v2/discover/schema";
-        if (scope !== "" || searchPattern !== "") {
-            endpoint = `${endpoint}?`;
+        let endpoint: string = "/v2/discover/schema?";
+
+        if (typeof scope !== "undefined") {
+            if (this.PossibleScopes.includes(scope)) {
+                endpoint = `${endpoint}scope=${scope}`;
+            } else {
+                return {
+                    error: new Error(
+                        "Possible scope values are `PRIVATE`, `SUBSCRIPTION`, `PUBLIC`, `ALL`. Only capitals accepted"
+                    ),
+                };
+            }
         }
 
-        if (scope !== "" && this.PossibleScopes.includes(scope)) {
-            endpoint = `${endpoint}scope=${scope}`;
-        } else {
-            return {
-                error: new Error(
-                    "Possible scope values are `PRIVATE`, `SUBSCRIPTION`, `PUBLIC`, `ALL`. Only capitals accepted"
-                ),
-            };
-        }
-
-        if (searchPattern !== "") {
+        if (typeof searchPattern !== "undefined") {
             endpoint = `&${endpoint}searchPattern=${searchPattern}`;
         }
 
@@ -67,9 +66,9 @@ export default class DiscoveryAPI {
             };
         }
 
-        endpoint = `${endpoint}scope=${scope}&${endpoint}schema=${schema}`;
+        endpoint = `${endpoint}scope=${scope}&schema=${schema}`;
 
-        if (searchPattern !== "") {
+        if (typeof searchPattern !== "undefined") {
             endpoint = `&${endpoint}searchPattern=${searchPattern}`;
         }
 
@@ -177,7 +176,7 @@ export default class DiscoveryAPI {
     ): Promise<Types.APIResponse> => {
         let endpoint: string = `/v2/discover/refs/primarykey?schema=${schema}&table=${table}`;
 
-        if (column !== "") {
+        if (typeof column !== "undefined") {
             endpoint = `${endpoint}&column=${column}`;
         }
 
@@ -201,7 +200,7 @@ export default class DiscoveryAPI {
     ): Promise<Types.APIResponse> => {
         let endpoint: string = `/v2/discover/refs/foreignkey?schema=${schema}&table=${table}`;
 
-        if (column !== "") {
+        if (typeof column !== "undefined") {
             endpoint = `${endpoint}&column=${column}`;
         }
 
@@ -233,11 +232,11 @@ export default class DiscoveryAPI {
 
         let endpoint: string = `/v2/discover/view?scope=${scope}`;
 
-        if (schema !== "") {
+        if (typeof schema !== "undefined") {
             endpoint = `${endpoint}&schema=${schema}`;
         }
 
-        if (searchPattern !== "") {
+        if (typeof searchPattern !== "undefined") {
             endpoint = `${endpoint}&searchPattern=${searchPattern}`;
         }
 
@@ -276,17 +275,16 @@ export default class DiscoveryAPI {
     ): Promise<Types.APIResponse> => {
         let endpoint: string = `/v2/discover/blockchains/${chainId}/schemas`;
 
-        if (
-            schemaType !== "" &&
-            this.PossibleSchemaTypes.includes(schemaType)
-        ) {
-            endpoint = `${endpoint}?schemaType=${schemaType}`;
-        } else {
-            return {
-                error: new Error(
-                    "Possible schema type values are `sxt`, `community`, `core`"
-                ),
-            };
+        if (typeof schemaType !== "undefined") {
+            if (this.PossibleSchemaTypes.includes(schemaType)) {
+                endpoint = `${endpoint}?schemaType=${schemaType}`;
+            } else {
+                return {
+                    error: new Error(
+                        "Possible schema type values are `sxt`, `community`, `core`"
+                    ),
+                };
+            }
         }
 
         const options = {

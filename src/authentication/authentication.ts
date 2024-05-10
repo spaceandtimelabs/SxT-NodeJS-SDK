@@ -52,7 +52,7 @@ export default class Authentication {
         };
 
         const accessTokenObject = await QueryHelper(options, 200);
-        if (accessTokenObject.data.length > 0) {
+        if (accessTokenObject.data?.accessToken.length > 0) {
             SetAccessToken(accessTokenObject.data);
         }
 
@@ -60,19 +60,19 @@ export default class Authentication {
     };
 
     // Refresh Token
-    RefreshToken = async (accessToken: string): Promise<Types.APIResponse> => {
+    RefreshToken = async (): Promise<Types.APIResponse> => {
         const options = {
             method: "POST",
             url: `${process.env.BASEURL_GENERAL}/v1/auth/refresh`,
             headers: {
                 accept: "application/json",
                 "content-type": "application/json",
-                authorization: `Bearer ${accessToken}`,
+                authorization: `Bearer ${GetAccessToken().accessToken}`,
             },
         };
 
         const refresTokenObject = await QueryHelper(options, 200);
-        if (refresTokenObject.data.length > 0) {
+        if (refresTokenObject.data?.accessToken.length > 0) {
             SetAccessToken(refresTokenObject.data);
         }
 

@@ -2,6 +2,10 @@
 export interface EdKeys {
     privateKey: Uint8Array;
     publicKey: Uint8Array;
+    privateKeyB64: string;
+    publicKeyB64: string;
+    privateKeyHex: string;
+    publicKeyHex: string;
 }
 
 // All API response format
