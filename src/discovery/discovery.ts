@@ -1,8 +1,8 @@
-import axios from "axios";
 import * as dotenv from "dotenv";
 
-import * as Types from "../helpers/types";
-import { GetAccessToken } from "../helpers/accesstoken";
+import * as Types from "../helpers/types.js";
+import { GetAccessToken } from "../helpers/accesstoken.js";
+import { QueryHelper } from "../helpers/queryhelper.js";
 
 dotenv.config();
 
@@ -48,18 +48,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List tables
@@ -93,18 +82,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List columns in table
@@ -123,18 +101,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List table indexes
@@ -153,18 +120,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List table primary key
@@ -183,18 +139,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List table relations
@@ -221,18 +166,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List primary key references in a table
@@ -256,18 +190,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List foreign key references in a table
@@ -291,18 +214,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List views
@@ -338,18 +250,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List Blockchains
@@ -365,18 +266,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List Blockchain schemas
@@ -408,18 +298,7 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // List Blockchain information
@@ -437,17 +316,6 @@ export default class DiscoveryAPI {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 }

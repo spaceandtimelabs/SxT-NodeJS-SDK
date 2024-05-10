@@ -1,7 +1,8 @@
-import axios from "axios";
 import * as dotenv from "dotenv";
 
-import * as Types from "../helpers/types";
+import * as Types from "../helpers/types.js";
+import { QueryHelper } from "../helpers/queryhelper.js";
+import { SetAccessToken, GetAccessToken } from "../helpers/accesstoken.js";
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ export default class Authentication {
             url: `${process.env.BASEURL_GENERAL}/v1/auth/code`,
             headers: {
                 accept: "application/json",
-                "Content-Type": "application/json",
+                "content-type": "application/json",
             },
             data: {
                 userId: userId,
@@ -24,18 +25,7 @@ export default class Authentication {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // Generate accessToken
@@ -50,6 +40,7 @@ export default class Authentication {
             url: `${process.env.BASEURL_GENERAL}/v1/auth/token`,
             headers: {
                 accept: "application/json",
+                "content-type": "application/json",
             },
             data: {
                 userId: userId,
@@ -60,18 +51,12 @@ export default class Authentication {
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
+        const accessTokenObject = await QueryHelper(options, 200);
+        if (accessTokenObject.data.length > 0) {
+            SetAccessToken(accessTokenObject.data);
         }
 
-        return {
-            data: result.data,
-        };
+        return accessTokenObject;
     };
 
     // Refresh Token
@@ -81,71 +66,44 @@ export default class Authentication {
             url: `${process.env.BASEURL_GENERAL}/v1/auth/refresh`,
             headers: {
                 accept: "application/json",
+                "content-type": "application/json",
                 authorization: `Bearer ${accessToken}`,
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
+        const refresTokenObject = await QueryHelper(options, 200);
+        if (refresTokenObject.data.length > 0) {
+            SetAccessToken(refresTokenObject.data);
         }
 
-        return {
-            data: result.data,
-        };
+        return refresTokenObject;
     };
 
     // Validate Token
-    ValidateToken = async (accessToken: string): Promise<Types.APIResponse> => {
+    ValidateToken = async (): Promise<Types.APIResponse> => {
         const options = {
             method: "GET",
             url: `${process.env.BASEURL_GENERAL}/v1/auth/validtoken`,
             headers: {
                 accept: "application/json",
-                authorization: `Bearer ${accessToken}`,
+                authorization: `Bearer ${GetAccessToken().accessToken}`,
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 200 || result.data.length <= 0) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 200);
     };
 
     // Logout
-    Logout = async (accessToken: string): Promise<Types.APIResponse> => {
+    Logout = async (): Promise<Types.APIResponse> => {
         const options = {
             method: "POST",
             url: `${process.env.BASEURL_GENERAL}/v1/auth/logout`,
             headers: {
                 accept: "application/json",
-                authorization: `Bearer ${accessToken}`,
+                authorization: `Bearer ${GetAccessToken().accessToken}`,
             },
         };
 
-        const result = await axios.request(options);
-        if (result.status !== 204) {
-            return {
-                error: new Error(
-                    `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                ),
-            };
-        }
-
-        return {
-            data: result.data,
-        };
+        return QueryHelper(options, 204);
     };
 }

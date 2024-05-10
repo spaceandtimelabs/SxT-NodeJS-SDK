@@ -24,3 +24,18 @@ export interface AccessTokenObject {
     accessTokenExpires: number;
     refreshTokenExpires: number;
 }
+
+// Credentials storage format
+export interface Credentails {
+    userid: string;
+    privateKey: string;
+    publicKey: string;
+}
+
+// Options for a http request
+export interface Options {
+    method: string;
+    url: string;
+    headers: any;
+    body?: any;
+}

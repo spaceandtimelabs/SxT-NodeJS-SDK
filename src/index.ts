@@ -1,8 +1,9 @@
-import Authentication from "./authentication/authentication";
-import Authorization from "./authorization/authorization";
-import DiscoveryAPI from "./discovery/discovery";
+import Authentication from "./authentication/authentication.js";
+import Authorization from "./authorization/authorization.js";
+import DiscoveryAPI from "./discovery/discovery.js";
+import SQLCore from "./sqlcore/sqlcore.js";
 
-export default class SpaceAndTimeSDK {
+class SpaceAndTime {
     Authentication = () => {
         return new Authentication();
     };
@@ -14,4 +15,10 @@ export default class SpaceAndTimeSDK {
     DiscoveryAPI = () => {
         return new DiscoveryAPI();
     };
+
+    SqlAPI = () => {
+        return new SQLCore();
+    };
 }
+
+export { SpaceAndTime };

@@ -1,8 +1,6 @@
-import SpaceAndTimeSDK from "../src/index";
+import { SpaceAndTime } from "../src/index.js";
 
-const sxt = new SpaceAndTimeSDK();
+const sxt = new SpaceAndTime();
 const auth = sxt.Authentication();
-console.log(auth);
-
-const discovery = sxt.DiscoveryAPI();
-console.log(discovery);
+const a = await auth.GenerateAuthCode("asdads");
+console.log(a);

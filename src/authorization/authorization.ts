@@ -1,4 +1,4 @@
-import * as Types from "../helpers/types";
+import * as Types from "../helpers/types.js";
 
 import { PrivateKey, biscuit, block } from "@biscuit-auth/biscuit-wasm";
 
