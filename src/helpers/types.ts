@@ -1,17 +1,16 @@
 // Response format for generating Ed25519 key pair
 export interface EdKeys {
-    privateKey: Uint8Array;
-    publicKey: Uint8Array;
-    privateKeyB64: string;
-    publicKeyB64: string;
-    privateKeyHex: string;
-    publicKeyHex: string;
+    privateKey_64: Uint8Array;
+    publicKey_32: Uint8Array;
+    privateKeyB64_64: string;
+    publicKeyB64_32: string;
+    biscuitPrivateKeyHex_32: string;
 }
 
 // All API response format
 export interface APIResponse {
-    error?: Error;
-    data?: any;
+    error?: Error | undefined;
+    data?: any | undefined;
 }
 
 // Biscuit generation input
@@ -30,10 +29,13 @@ export interface AccessTokenObject {
 }
 
 // Credentials storage format
-export interface Credentails {
+export interface Credentials {
     userid: string;
-    privateKey: string;
-    publicKey: string;
+    privateKeyB64_64: string;
+    publicKeyB64_32: string;
+    resource: string;
+    biscuit: string;
+    biscuitPrivateKeyHex_32: string;
 }
 
 // Options for a http request

@@ -9,17 +9,17 @@ export default class Authorization {
         capabilities: Types.BiscuitCapabilities[],
         privKey: string
     ): Types.APIResponse => {
-        let biscuitTokens: string[];
+        let biscuitTokens: string[] = [];
         let biscuitBuilder = biscuit``;
 
         for (let capabilityObj of capabilities) {
             let biscuitBlock = block`sxt:capability(${capabilityObj.operation}, ${capabilityObj.resource})`;
             biscuitBuilder.merge(biscuitBlock);
         }
-        let wildCardBiscuitToken = biscuitBuilder
+        let permissionedBiscuitToken = biscuitBuilder
             .build(PrivateKey.fromString(privKey))
             .toBase64();
-        biscuitTokens.push(wildCardBiscuitToken);
+        biscuitTokens.push(permissionedBiscuitToken);
 
         return { data: biscuitTokens };
     };
@@ -29,7 +29,7 @@ export default class Authorization {
         capabilities: Types.BiscuitCapabilities,
         privKey: string
     ): Types.APIResponse => {
-        let biscuitTokens: string[];
+        let biscuitTokens: string[] = [];
         let biscuitBuilder = biscuit``;
 
         let biscuitBlock = block`sxt:capability(*, ${capabilities.resource})`;
@@ -48,13 +48,30 @@ export default class Authorization {
         const keyPair = nacl.sign.keyPair();
         const { publicKey, secretKey } = keyPair;
 
+        const trimmedSecretKey = secretKey.slice(0, 32);
+
         return {
-            privateKey: secretKey,
-            publicKey: publicKey,
-            privateKeyB64: Buffer.from(secretKey).toString("base64"),
-            publicKeyB64: Buffer.from(publicKey).toString("base64"),
-            privateKeyHex: Buffer.from(secretKey).toString("hex"),
-            publicKeyHex: Buffer.from(publicKey).toString("hex"),
+            privateKey_64: secretKey,
+            publicKey_32: publicKey,
+            privateKeyB64_64: Buffer.from(secretKey).toString("base64"),
+            publicKeyB64_32: Buffer.from(publicKey).toString("base64"),
+            biscuitPrivateKeyHex_32:
+                Buffer.from(trimmedSecretKey).toString("hex"),
+        };
+    };
+
+    // Generate Ed25519 keypair from provided string
+    GenerateKeyPairFromString = (keypair: Types.Credentials): Types.EdKeys => {
+        return {
+            privateKey_64: Uint8Array.from(
+                Buffer.from(keypair.privateKeyB64_64, "base64")
+            ),
+            publicKey_32: Uint8Array.from(
+                Buffer.from(keypair.publicKeyB64_32, "base64")
+            ),
+            privateKeyB64_64: keypair.privateKeyB64_64,
+            publicKeyB64_32: keypair.publicKeyB64_32,
+            biscuitPrivateKeyHex_32: keypair.biscuitPrivateKeyHex_32,
         };
     };
 

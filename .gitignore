@@ -98,3 +98,5 @@ errorlogs.txt
 session.txt
 timer-store.txt
 test/
+session.json
+credentials.json

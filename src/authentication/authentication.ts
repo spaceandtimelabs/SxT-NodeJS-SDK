@@ -106,4 +106,17 @@ export default class Authentication {
 
         return QueryHelper(options, 204);
     };
+
+    // Check user
+    CheckUser = async (userId: string): Promise<Types.APIResponse> => {
+        const options = {
+            method: "GET",
+            url: `${process.env.BASEURL_GENERAL}/v1/auth/idexists/${userId}`,
+            headers: {
+                accept: "application/json",
+            },
+        };
+
+        return QueryHelper(options, 200);
+    };
 }

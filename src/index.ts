@@ -2,6 +2,7 @@ import Authentication from "./authentication/authentication.js";
 import Authorization from "./authorization/authorization.js";
 import DiscoveryAPI from "./discovery/discovery.js";
 import SQLCore from "./sqlcore/sqlcore.js";
+import Storage from "./storage/storage.js";
 
 class SpaceAndTime {
     Authentication = () => {
@@ -18,6 +19,10 @@ class SpaceAndTime {
 
     SqlAPI = () => {
         return new SQLCore();
+    };
+
+    Storage = () => {
+        return new Storage();
     };
 }
 

@@ -20,7 +20,7 @@ export default class SQLCore {
                 authorization: `Bearer ${GetAccessToken().accessToken}`,
                 originApp: originApp,
             },
-            body: {
+            data: {
                 sqlText: sqlText,
                 biscuits: biscuits,
             },
@@ -47,7 +47,7 @@ export default class SQLCore {
                 authorization: `Bearer ${GetAccessToken().accessToken}`,
                 originApp: originApp,
             },
-            body: {
+            data: {
                 sqlText: sqlText,
                 biscuits: biscuits,
                 resources: resources,
@@ -75,7 +75,7 @@ export default class SQLCore {
                 authorization: `Bearer ${GetAccessToken().accessToken}`,
                 originApp: originApp,
             },
-            body: {
+            data: {
                 sqlText: sqlText,
                 biscuits: biscuits,
                 resources: resources,

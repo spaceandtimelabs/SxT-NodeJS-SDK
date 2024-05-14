@@ -5,30 +5,23 @@ export const QueryHelper = async (
     options: Types.Options,
     httpOk: number
 ): Promise<Types.APIResponse> => {
-    const result = await axios.request(options);
-
-    switch (httpOk) {
-        case 200:
-            if (result.status !== 200 || result.data.length <= 0) {
+    try {
+        const result = await axios.request(options);
+        switch (httpOk) {
+            case 200:
                 return {
-                    error: new Error(
-                        `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                    ),
+                    data: result.data,
                 };
-            }
-            return {
-                data: result.data,
-            };
-        case 204:
-            if (result.status !== 204) {
+            case 204:
                 return {
-                    error: new Error(
-                        `${result.status}: ${result.data.title}. Detail: ${result.data.detail}`
-                    ),
+                    data: null,
                 };
-            }
-            return {
-                data: null,
-            };
+        }
+    } catch (err) {
+        return {
+            error: new Error(
+                `${err.response.status}: ${err.response.data.title}. Detail: ${err.response.data.detail}`
+            ),
+        };
     }
 };
