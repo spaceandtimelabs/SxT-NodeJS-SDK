@@ -1,7 +1,6 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/dist
 /tmp
 /out-tsc
 
@@ -91,12 +90,12 @@ lerna-debug.log
 Thumbs.db
 
 #Local Files
-biscuits.js
 MockSDK.js
 created-user-details.txt
 tester.js
 errorlogs.txt
-GenerateBiscuit.js
 session.txt
 timer-store.txt
 test/
+session.json
+credentials.json

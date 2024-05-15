@@ -1,24 +1,47 @@
 {
-  "name": "nodesdk-sxt",
-  "version": "1.0.1",
-  "type": "module",
-  "description": "An SDK to easily interact with Space and Time",
-  "main": "SpaceAndTimeSDK.js",
-  "scripts": {
-    "start": "node --experimental-wasm-modules examples.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@biscuit-auth/biscuit-wasm": "^0.4.0-alpha3",
-    "axios": "^1.3.4",
-    "base64-js": "^1.5.1",
-    "base64url": "^3.0.1",
-    "crypto-js": "^4.1.1",
-    "dotenv": "^16.0.3",
-    "node-cron": "^3.0.2",
-    "tweetnacl": "^1.0.3"
-  }
+    "name": "sxt-nodejs-sdk",
+    "version": "2.0.6",
+    "description": "An SDK to easily interact with Space and Time",
+    "main": "src/index.ts",
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": {
+                "default": "./src/index.ts"
+            },
+            "default": {
+                "default": "./dist/src/index.js"
+            }
+        },
+        "./package.json": "./package.json"
+    },
+    "scripts": {
+        "build": "tsc  && node --experimental-wasm-modules  ./dist/src/index.js",
+        "start": "node --experimental-wasm-modules  ./dist/examples/index.js",
+        "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' & mocha  --require ts-node/register dist/tests/**.spec.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@biscuit-auth/biscuit-wasm": "^0.4.0",
+        "axios": "^1.3.4",
+        "base64-js": "^1.5.1",
+        "base64url": "^3.0.1",
+        "crypto-js": "^4.1.1",
+        "dotenv": "^16.4.5",
+        "tweetnacl": "^1.0.3"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.16",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.12.12",
+        "chai": "^5.1.1",
+        "cross-env": "^7.0.3",
+        "mocha": "^10.4.0",
+        "ts-loader": "^9.5.1",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.4.5"
+    }
 }
