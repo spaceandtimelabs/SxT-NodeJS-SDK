@@ -1,5 +1,6 @@
 ## SxT-NodeJS-SDK (v.2.0.7)
 
+
 JavaScript(NodeJS) SDK for Space and Time Gateway (javascript version >= 19.8.0)
 
 ## Installation Instructions
@@ -218,6 +219,7 @@ const dropTable = await sqlAPI.DDL(`DROP TABLE ${resourceName}`, biscuitArray);
     Discovery SDK calls need a user to be logged in.
 
 ```js
+
 const discovery = sxt.DiscoveryAPI();
 
 // List schemas
