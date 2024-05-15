@@ -1,8 +1,22 @@
-## javascript-sxt-sdk (v.2.0.6)
+## SxT-NodeJS-SDK (v.2.0.7)
 
 JavaScript(NodeJS) SDK for Space and Time Gateway (javascript version >= 19.8.0)
 
 ## Installation Instructions
+
+#### Installation using a package
+
+```sh
+npm install sxt-nodejs-sdk
+```
+
+or
+
+```sh
+yarn add sxt-nodejs-sdk
+```
+
+#### Working with source code
 
 _Note: Before running the code, rename `.env.sample` to `.env` and ensure that your credentials are setup in the `.env` file properly_
 
@@ -10,19 +24,27 @@ _Note: Before running the code, rename `.env.sample` to `.env` and ensure that y
 npm install
 ```
 
+or
+
+```sh
+yarn
+```
+
 The code in `examples/index.ts` demonstrates how to call the SDK
 
-To run your code, use the command, configure the **package.json** like this
+## Running your project
+
+To run your code, configure the **package.json** of your project like the following
 
 ```js
 "scripts": {
-        "build": "node --experimental-wasm-modules <YOUR_PROJECT_ENTRY_POINT.js>",
-    }
+    "build": "node --experimental-wasm-modules <YOUR_PROJECT_ENTRY_POINT.js>",
+}
 
 ```
 
-_Note: The `--experimental-wasm-modules` flag is required as Web Assembly is used in some parts of the codebase
-which requires this flag to run the code._
+The `--experimental-wasm-modules` flag is required as Web Assembly is used in some parts of the codebase
+which requires this flag to run the code.
 
 ## Features
 
@@ -64,6 +86,9 @@ which requires this flag to run the code._
 ```js
 // Initializing the Space and Time SDK for use.
 import { SpaceAndTime } from "sxt-nodejs-sdk";
+
+// Instantiate SXT
+const sxt = new SpaceAndTime();
 ```
 
 -   **Authenticating with the Space and Time Platform**
@@ -73,7 +98,7 @@ Make sure to save your **private key** used in authentication and biscuit genera
 The generated `AccessToken` is valid for 25 minutes and the `RefreshToken` for 30 minutes.
 
 ```js
-// Authenticate yourself using the Space and Time SDK.
+// Authenticate a user using the Space and Time SDK.
 // Auth code
 const authentication = sxt.Authentication();
 
@@ -160,7 +185,7 @@ const biscuit = await authorization.CreateBiscuitToken(
 To create a new **schema**, `ddl_create` permission is needed.
 
 ```js
-// Create a Schema
+// Create a table
 const createTable = await sqlAPI.DDL(
     `CREATE TABLE ${resourceName}  (id INT PRIMARY KEY, test VARCHAR)`,
     biscuitArray
