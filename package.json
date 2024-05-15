@@ -1,6 +1,7 @@
 {
     "name": "sxt-nodejs-sdk",
-    "version": "2.0.6",
+    "version": "2.0.7",
+
     "description": "An SDK to easily interact with Space and Time",
     "main": "src/index.ts",
     "type": "module",
