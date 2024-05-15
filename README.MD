@@ -1,4 +1,4 @@
-## javascript-sxt-sdk (v.2.0.5)
+## javascript-sxt-sdk (v.2.0.6)
 
 JavaScript(NodeJS) SDK for Space and Time Gateway (javascript version >= 19.8.0)
 

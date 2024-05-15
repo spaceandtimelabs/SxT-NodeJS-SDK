@@ -1,21 +1,36 @@
 import axios from "axios";
-export const QueryHelper = async (options, httpOk) => {
+export const QueryHelper = async (options, httpOk = 0) => {
+    let output = {};
     try {
         const result = await axios.request(options);
-        switch (httpOk) {
-            case 200:
-                return {
-                    data: result.data,
-                };
-            case 204:
-                return {
-                    data: null,
-                };
+        if (httpOk <= 0) {
+            output = {
+                error: new Error(`No default http ok condition specified`),
+            };
+        }
+        else {
+            switch (httpOk) {
+                case 200:
+                    output = {
+                        data: result.data,
+                    };
+                    break;
+                case 204:
+                    output = {
+                        data: null,
+                    };
+                    break;
+                default:
+                    output = {
+                        error: new Error(`Bad http ok condition`),
+                    };
+            }
         }
     }
     catch (err) {
-        return {
+        output = {
             error: new Error(`${err.response.status}: ${err.response.data.title}. Detail: ${err.response.data.detail}`),
         };
     }
+    return output;
 };
