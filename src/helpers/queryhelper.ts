@@ -5,23 +5,27 @@ export const QueryHelper = async (
     options: Types.Options,
     httpOk: number
 ): Promise<Types.APIResponse> => {
+    let output: Types.APIResponse = {};
     try {
         const result = await axios.request(options);
         switch (httpOk) {
             case 200:
-                return {
+                output = {
                     data: result.data,
                 };
             case 204:
-                return {
+                output = {
                     data: null,
                 };
         }
+        output = {
+            error: new Error(`No default http ok condition specified`),
+        };
     } catch (err) {
-        return {
-            error: new Error(
-                `${err.response.status}: ${err.response.data.title}. Detail: ${err.response.data.detail}`
-            ),
+        output = {
+            error: new Error(`Something went wrong while calling the API`),
         };
     }
+
+    return output;
 };

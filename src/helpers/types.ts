@@ -9,8 +9,8 @@ export interface EdKeys {
 
 // All API response format
 export interface APIResponse {
-    error?: Error | undefined;
-    data?: any | undefined;
+    error?: Error | any;
+    data?: any;
 }
 
 // Biscuit generation input
