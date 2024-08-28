@@ -60,5 +60,32 @@ export default class Authorization {
                 signature: signature,
             };
         };
+        // Convert private-key-64-bytes to private-key-32-bytes
+        // input is base64 encoded private key
+        this.ConvertKey64To32 = (pvtKey) => {
+            const pvtBinaryString = atob(pvtKey);
+            const bytes = new Uint8Array(pvtBinaryString.length);
+            for (let i = 0; i < pvtBinaryString.length; i++) {
+                bytes[i] = pvtBinaryString.charCodeAt(i);
+            }
+            const pvtkey32 = bytes.slice(0, 32);
+            return Buffer.from(pvtkey32).toString("base64");
+        };
+        // Convert private-key-32-bytes to private-key-64-bytes
+        // input strings are base64 encoded
+        this.ConvertKey32To64 = (pvtKey, pubKey) => {
+            const pvtBinaryString = atob(pvtKey);
+            const pvtBytes = new Uint8Array(pvtBinaryString.length);
+            for (let i = 0; i < pvtBinaryString.length; i++) {
+                pvtBytes[i] = pvtBinaryString.charCodeAt(i);
+            }
+            const pubBinaryString = atob(pubKey);
+            const pubBytes = new Uint8Array(pubBinaryString.length);
+            for (let i = 0; i < pubBinaryString.length; i++) {
+                pubBytes[i] = pubBinaryString.charCodeAt(i);
+            }
+            const mergedPvtKey = new Uint8Array([...pvtBytes, ...pubBytes]);
+            return Buffer.from(mergedPvtKey).toString("base64");
+        };
     }
 }
