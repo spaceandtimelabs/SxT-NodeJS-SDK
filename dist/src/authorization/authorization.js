@@ -39,6 +39,7 @@ export default class Authorization {
                 privateKeyB64_64: Buffer.from(secretKey).toString("base64"),
                 publicKeyB64_32: Buffer.from(publicKey).toString("base64"),
                 biscuitPrivateKeyHex_32: Buffer.from(trimmedSecretKey).toString("hex"),
+                biscuitPublicKeyHex_32: Buffer.from(publicKey).toString("hex"),
             };
         };
         // Generate Ed25519 keypair from provided string
@@ -49,11 +50,16 @@ export default class Authorization {
                 privateKeyB64_64: keypair.privateKeyB64_64,
                 publicKeyB64_32: keypair.publicKeyB64_32,
                 biscuitPrivateKeyHex_32: keypair.biscuitPrivateKeyHex_32,
+                biscuitPublicKeyHex_32: keypair.biscuitPublicKeyHex_32,
             };
         };
         // Generate signature
-        this.GenerateSignature = async (authCode, privkey) => {
-            const signatureArray = nacl.sign(authCode, privkey);
+        this.GenerateSignature = async (authCode, privKey) => {
+            // Ensure inputs are Uint8Array
+            const message = new TextEncoder().encode(authCode); // Convert authCode to Uint8Array
+            const privateKey = Uint8Array.from(Buffer.from(privKey, "hex")); // Convert privKey (hex string) to Uint8Array
+            // Generate signature
+            const signatureArray = nacl.sign(message, privateKey);
             let signature = Buffer.from(signatureArray.buffer, signatureArray.byteOffset, signatureArray.byteLength).toString("hex");
             signature = signature.slice(0, 128);
             return {

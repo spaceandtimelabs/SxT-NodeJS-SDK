@@ -5,6 +5,7 @@ export interface EdKeys {
     privateKeyB64_64: string;
     publicKeyB64_32: string;
     biscuitPrivateKeyHex_32: string;
+    biscuitPublicKeyHex_32: string;
 }
 
 // All API response format
@@ -36,6 +37,7 @@ export interface Credentials {
     resource: string;
     biscuit: string;
     biscuitPrivateKeyHex_32: string;
+    biscuitPublicKeyHex_32: string;
 }
 
 // Options for a http request

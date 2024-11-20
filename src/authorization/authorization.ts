@@ -57,6 +57,7 @@ export default class Authorization {
             publicKeyB64_32: Buffer.from(publicKey).toString("base64"),
             biscuitPrivateKeyHex_32:
                 Buffer.from(trimmedSecretKey).toString("hex"),
+            biscuitPublicKeyHex_32: Buffer.from(publicKey).toString("hex"),
         };
     };
 
@@ -72,15 +73,22 @@ export default class Authorization {
             privateKeyB64_64: keypair.privateKeyB64_64,
             publicKeyB64_32: keypair.publicKeyB64_32,
             biscuitPrivateKeyHex_32: keypair.biscuitPrivateKeyHex_32,
+            biscuitPublicKeyHex_32: keypair.biscuitPublicKeyHex_32,
         };
     };
 
     // Generate signature
     GenerateSignature = async (
-        authCode: Uint8Array,
-        privkey: Uint8Array
+        authCode: string,
+        privKey: string
     ): Promise<any> => {
-        const signatureArray = nacl.sign(authCode, privkey);
+        // Ensure inputs are Uint8Array
+        const message = new TextEncoder().encode(authCode); // Convert authCode to Uint8Array
+        const privateKey = Uint8Array.from(Buffer.from(privKey, "hex")); // Convert privKey (hex string) to Uint8Array
+
+        // Generate signature
+        const signatureArray = nacl.sign(message, privateKey);
+
         let signature = Buffer.from(
             signatureArray.buffer,
             signatureArray.byteOffset,
