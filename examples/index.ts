@@ -44,38 +44,53 @@ const CheckExistingSession = async (
  * Authentication process
  */
 const AuthUtil = async (userId: string, sxt: any): Promise<any> => {
-    // Auth code
-    const authentication = sxt.Authentication();
+    try {
+        const authentication = sxt.Authentication();
+        const authorization = sxt.Authorization();
 
-    const authCode = await authentication.GenerateAuthCode(userId);
-    // console.log("Auth Code", authCode.data.authCode);
+        // Check user
+        const userExists = await authentication.CheckUser(userId);
 
-    // Check user
-    const userExists = await authentication.CheckUser(userId);
+        if (!userExists.data) {
+            // Generate new key pair
+            const keyPair = await authorization.GenerateKeyPair();
+            keypair = keyPair;
+        } else {
+            console.error(
+                "The user exists but you have misplaced the session.json and credentials.json files. Please create them in the root folder of the sdk. Example can be found here https://github.com/spaceandtimelabs/SxT-NodeJS-SDK/tree/main/examples"
+            );
+            return undefined;
+        }
 
-    const authorization = sxt.Authorization();
-    if (!userExists.data) {
-        // Generate new key pair
-        const keyPair = await authorization.GenerateKeyPair();
-        keypair = keyPair;
+        // Auth code
+        const authCode = await authentication.GenerateAuthCode(userId);
+        console.log("Auth Code", authCode.data, keypair);
+
+        if (typeof authCode.data === "undefined") {
+            console.log(authCode);
+            return undefined;
+        }
+
+        // Sign message
+        const sign = await authorization.GenerateSignature(
+            authCode.data.authCode,
+            keypair.privateKey_64
+        );
+        console.log("Signature", sign.signature);
+
+        // Get access token
+        const accessToken = await authentication.GenerateToken(
+            userId,
+            authCode.data.authCode,
+            sign.signature,
+            keypair.publicKeyB64_32
+        );
+        console.log("Access Token", accessToken);
+        return accessToken.data;
+    } catch (e) {
+        console.log("ERR", e);
+        return undefined;
     }
-
-    // Sign message
-    const sign = await authorization.GenerateSignature(
-        new TextEncoder().encode(authCode.data.authCode),
-        keypair.privateKey_64
-    );
-    // console.log("Signature", sign.signature);
-
-    // Get access token
-    const accessToken = await authentication.GenerateToken(
-        userId,
-        authCode.data.authCode,
-        sign.signature,
-        keypair.publicKeyB64_32
-    );
-    // console.log("Access Token", accessToken);
-    return accessToken.data;
 };
 
 /**
@@ -159,6 +174,7 @@ const SQLAPIUtil = async (sxt: any, keypair: any): Promise<Boolean> => {
         resource: resourceName,
         biscuit: biscuit.data[0],
         biscuitPrivateKeyHex_32: keypair.biscuitPrivateKeyHex_32,
+        biscuitPublicKeyHex_32: keypair.biscuitPublicKeyHex_32,
     };
 
     const storage = sxt.Storage();
@@ -175,7 +191,7 @@ const SQLAPIUtil = async (sxt: any, keypair: any): Promise<Boolean> => {
     // SQL operations
     // Create
     const createTable = await sqlAPI.DDL(
-        `CREATE TABLE ${resourceName}  (id INT PRIMARY KEY, test VARCHAR)`,
+        `CREATE TABLE ${resourceName}  (id INT PRIMARY KEY, test VARCHAR) WITH "public_key=${keypair.biscuitPublicKeyHex_32},access_type=public_append"`,
         biscuitArray
     );
     // console.log("CREATE TABLE", createTable);

@@ -32,9 +32,7 @@ export const QueryHelper = async (
         }
     } catch (err: any) {
         output = {
-            error: new Error(
-                `${err.response.status}: ${err.response.data.title}. Detail: ${err.response.data.detail}`
-            ),
+            error: err,
         };
     }
 

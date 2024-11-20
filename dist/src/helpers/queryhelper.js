@@ -29,7 +29,7 @@ export const QueryHelper = async (options, httpOk = 0) => {
     }
     catch (err) {
         output = {
-            error: new Error(`${err.response.status}: ${err.response.data.title}. Detail: ${err.response.data.detail}`),
+            error: err,
         };
     }
     return output;
