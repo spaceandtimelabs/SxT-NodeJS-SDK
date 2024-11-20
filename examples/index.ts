@@ -57,7 +57,7 @@ const AuthUtil = async (userId: string, sxt: any): Promise<any> => {
             keypair = keyPair;
         } else {
             console.error(
-                "The user exists but you have misplaced the session.json and credentials.json files. Please create them in the root folder of the sdk. Example can be found here https://github.com/spaceandtimelabs/SxT-NodeJS-SDK/tree/main/dist/examples"
+                "The user exists but you have misplaced the session.json and credentials.json files. Please create them in the root folder of the sdk. Example can be found here https://github.com/spaceandtimelabs/SxT-NodeJS-SDK/tree/main/examples"
             );
             return undefined;
         }
