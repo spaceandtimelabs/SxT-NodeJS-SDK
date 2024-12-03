@@ -71,12 +71,12 @@ export default class Authentication {
             },
         };
 
-        const refresTokenObject = await QueryHelper(options, 200);
-        if (refresTokenObject.data?.accessToken.length > 0) {
-            SetAccessToken(refresTokenObject.data);
+        const refreshTokenObject = await QueryHelper(options, 200);
+        if (refreshTokenObject.data?.accessToken.length > 0) {
+            SetAccessToken(refreshTokenObject.data);
         }
 
-        return refresTokenObject;
+        return refreshTokenObject;
     };
 
     // Validate Token
