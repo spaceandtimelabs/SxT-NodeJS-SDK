@@ -16,7 +16,7 @@ const sxt = new SpaceAndTime();
 const CheckExistingSession = async (
     sessionFilePath: string,
     sxt: any
-): Promise<Boolean> => {
+): Promise<boolean> => {
     const storage = sxt.Storage();
     if (storage.ReadSession(sessionFilePath)?.error) {
         return false;
@@ -98,7 +98,7 @@ const AuthUtil = async (userId: string, sxt: any): Promise<any> => {
  * Discovery APIs
  */
 
-const DiscoveryUtil = async (sxt: any): Promise<Boolean> => {
+const DiscoveryUtil = async (sxt: any): Promise<boolean> => {
     const discovery = sxt.DiscoveryAPI();
 
     // List schemas
@@ -128,7 +128,7 @@ const DiscoveryUtil = async (sxt: any): Promise<Boolean> => {
  * SQL Core APIs
  */
 
-const SQLAPIUtil = async (sxt: any, keypair: any): Promise<Boolean> => {
+const SQLAPIUtil = async (sxt: any, keypair: any): Promise<boolean> => {
     // Create Biscuits
     const requiredBiscuit = [
         {
