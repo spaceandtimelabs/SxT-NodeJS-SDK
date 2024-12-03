@@ -17,7 +17,7 @@ const CheckExistingSession = async (sessionFilePath, sxt) => {
     }
     const accessTokenObj = sxt.Authentication();
     const validateResponse = await accessTokenObj.ValidateToken();
-    if (typeof validateResponse.error !== "undefined") {
+    if (validateResponse.error !== undefined) {
         return false;
     }
     const credentialsJson = storage.ReadCredentials(credentialsFilePath).data;
@@ -48,7 +48,7 @@ const AuthUtil = async (userId, sxt) => {
         // Auth code
         const authCode = await authentication.GenerateAuthCode(userId);
         console.log("Auth Code", authCode.data, keypair);
-        if (typeof authCode.data === "undefined") {
+        if (authCode.data === undefined) {
             console.log(authCode);
             return undefined;
         }
