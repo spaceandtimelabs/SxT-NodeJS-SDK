@@ -1,135 +1,146 @@
 import nacl from "tweetnacl";
 import { PrivateKey, biscuit, block } from "@biscuit-auth/biscuit-wasm";
-
 import * as Types from "../helpers/types.js";
 
-export default class Authorization {
-    // Create biscuit from the given rules
-    CreateBiscuitToken = (
+interface KeyPairResult {
+    privateKey_64: Uint8Array;
+    publicKey_32: Uint8Array;
+    privateKeyB64_64: string;
+    publicKeyB64_32: string;
+    biscuitPrivateKeyHex_32: string;
+    biscuitPublicKeyHex_32: string;
+}
+
+export class Authorization {
+    private static readonly encoder = new TextEncoder();
+
+    /**
+     * Creates a biscuit token from given capabilities
+     */
+    public createBiscuitToken(
         capabilities: Types.BiscuitCapabilities[],
         privKey: string
-    ): Types.APIResponse => {
-        let biscuitTokens: string[] = [];
-        let biscuitBuilder = biscuit``;
+    ): Types.APIResponse {
+        try {
+            const biscuitBuilder = biscuit``;
+            
+            const token = capabilities
+                .reduce((builder, cap) => {
+                    const biscuitBlock = block`sxt:capability(${cap.operation}, ${cap.resource})`;
+                    return builder.merge(biscuitBlock);
+                }, biscuitBuilder)
+                .build(PrivateKey.fromString(privKey))
+                .toBase64();
 
-        for (let capabilityObj of capabilities) {
-            let biscuitBlock = block`sxt:capability(${capabilityObj.operation}, ${capabilityObj.resource})`;
-            biscuitBuilder.merge(biscuitBlock);
+            return { data: [token] };
+        } catch (error) {
+            throw new Error(`Failed to create biscuit token: ${error.message}`);
         }
-        let permissionedBiscuitToken = biscuitBuilder
-            .build(PrivateKey.fromString(privKey))
-            .toBase64();
-        biscuitTokens.push(permissionedBiscuitToken);
+    }
 
-        return { data: biscuitTokens };
-    };
-
-    // Create wildcard biscuit from the given rules
-    CreateWildcardBiscuitToken = (
+    /**
+     * Creates a wildcard biscuit token
+     */
+    public createWildcardBiscuitToken(
         capabilities: Types.BiscuitCapabilities,
         privKey: string
-    ): Types.APIResponse => {
-        let biscuitTokens: string[] = [];
-        let biscuitBuilder = biscuit``;
+    ): Types.APIResponse {
+        try {
+            const biscuitBuilder = biscuit``;
+            const biscuitBlock = block`sxt:capability(*, ${capabilities.resource})`;
+            
+            const token = biscuitBuilder
+                .merge(biscuitBlock)
+                .build(PrivateKey.fromString(privKey))
+                .toBase64();
 
-        let biscuitBlock = block`sxt:capability(*, ${capabilities.resource})`;
-        biscuitBuilder.merge(biscuitBlock);
+            return { data: [token] };
+        } catch (error) {
+            throw new Error(`Failed to create wildcard biscuit token: ${error.message}`);
+        }
+    }
 
-        let wildCardBiscuitToken = biscuitBuilder
-            .build(PrivateKey.fromString(privKey))
-            .toBase64();
-        biscuitTokens.push(wildCardBiscuitToken);
+    /**
+     * Generates an Ed25519 keypair
+     */
+    public async generateKeyPair(): Promise<KeyPairResult> {
+        try {
+            const { publicKey, secretKey } = nacl.sign.keyPair();
+            const trimmedSecretKey = secretKey.slice(0, 32);
 
-        return { data: biscuitTokens };
-    };
+            return {
+                privateKey_64: secretKey,
+                publicKey_32: publicKey,
+                privateKeyB64_64: Buffer.from(secretKey).toString("base64"),
+                publicKeyB64_32: Buffer.from(publicKey).toString("base64"),
+                biscuitPrivateKeyHex_32: Buffer.from(trimmedSecretKey).toString("hex"),
+                biscuitPublicKeyHex_32: Buffer.from(publicKey).toString("hex"),
+            };
+        } catch (error) {
+            throw new Error(`Failed to generate keypair: ${error.message}`);
+        }
+    }
 
-    // Generate Ed25519 keypair
-    GenerateKeyPair = async (): Promise<Types.EdKeys> => {
-        const keyPair = nacl.sign.keyPair();
-        const { publicKey, secretKey } = keyPair;
+    /**
+     * Generates an Ed25519 keypair from provided credentials
+     */
+    public generateKeyPairFromString(keypair: Types.Credentials): KeyPairResult {
+        try {
+            return {
+                privateKey_64: Uint8Array.from(Buffer.from(keypair.privateKeyB64_64, "base64")),
+                publicKey_32: Uint8Array.from(Buffer.from(keypair.publicKeyB64_32, "base64")),
+                privateKeyB64_64: keypair.privateKeyB64_64,
+                publicKeyB64_32: keypair.publicKeyB64_32,
+                biscuitPrivateKeyHex_32: keypair.biscuitPrivateKeyHex_32,
+                biscuitPublicKeyHex_32: keypair.biscuitPublicKeyHex_32,
+            };
+        } catch (error) {
+            throw new Error(`Failed to generate keypair from string: ${error.message}`);
+        }
+    }
 
-        const trimmedSecretKey = secretKey.slice(0, 32);
-
-        return {
-            privateKey_64: secretKey,
-            publicKey_32: publicKey,
-            privateKeyB64_64: Buffer.from(secretKey).toString("base64"),
-            publicKeyB64_32: Buffer.from(publicKey).toString("base64"),
-            biscuitPrivateKeyHex_32:
-                Buffer.from(trimmedSecretKey).toString("hex"),
-            biscuitPublicKeyHex_32: Buffer.from(publicKey).toString("hex"),
-        };
-    };
-
-    // Generate Ed25519 keypair from provided string
-    GenerateKeyPairFromString = (keypair: Types.Credentials): Types.EdKeys => {
-        return {
-            privateKey_64: Uint8Array.from(
-                Buffer.from(keypair.privateKeyB64_64, "base64")
-            ),
-            publicKey_32: Uint8Array.from(
-                Buffer.from(keypair.publicKeyB64_32, "base64")
-            ),
-            privateKeyB64_64: keypair.privateKeyB64_64,
-            publicKeyB64_32: keypair.publicKeyB64_32,
-            biscuitPrivateKeyHex_32: keypair.biscuitPrivateKeyHex_32,
-            biscuitPublicKeyHex_32: keypair.biscuitPublicKeyHex_32,
-        };
-    };
-
-    // Generate signature
-    GenerateSignature = async (
+    /**
+     * Generates a signature for the given auth code
+     */
+    public async generateSignature(
         authCode: string,
         privKey: string
-    ): Promise<any> => {
-        // Ensure inputs are Uint8Array
-        const message = new TextEncoder().encode(authCode); // Convert authCode to Uint8Array
-        const privateKey = Uint8Array.from(Buffer.from(privKey, "hex")); // Convert privKey (hex string) to Uint8Array
-
-        // Generate signature
-        const signatureArray = nacl.sign(message, privateKey);
-
-        let signature = Buffer.from(
-            signatureArray.buffer,
-            signatureArray.byteOffset,
-            signatureArray.byteLength
-        ).toString("hex");
-        signature = signature.slice(0, 128);
-
-        return {
-            signature: signature,
-        };
-    };
-
-    // Convert private-key-64-bytes to private-key-32-bytes
-    // input is base64 encoded private key
-    ConvertKey64To32 = (pvtKey: string) => {
-        const pvtBinaryString = atob(pvtKey);
-        const bytes = new Uint8Array(pvtBinaryString.length);
-        for (let i = 0; i < pvtBinaryString.length; i++) {
-            bytes[i] = pvtBinaryString.charCodeAt(i);
+    ): Promise<{ signature: string }> {
+        try {
+            const message = Authorization.encoder.encode(authCode);
+            const privateKey = Uint8Array.from(Buffer.from(privKey, "hex"));
+            const signatureArray = nacl.sign(message, privateKey);
+            
+            return {
+                signature: Buffer.from(signatureArray).toString("hex").slice(0, 128),
+            };
+        } catch (error) {
+            throw new Error(`Failed to generate signature: ${error.message}`);
         }
+    }
 
-        const pvtkey32 = bytes.slice(0, 32);
-        return Buffer.from(pvtkey32).toString("base64");
-    };
-
-    // Convert private-key-32-bytes to private-key-64-bytes
-    // input strings are base64 encoded
-    ConvertKey32To64 = (pvtKey: string, pubKey: string) => {
-        const pvtBinaryString = atob(pvtKey);
-        const pvtBytes = new Uint8Array(pvtBinaryString.length);
-        for (let i = 0; i < pvtBinaryString.length; i++) {
-            pvtBytes[i] = pvtBinaryString.charCodeAt(i);
+    /**
+     * Converts a 64-byte private key to 32-byte format
+     */
+    public convertKey64To32(pvtKey: string): string {
+        try {
+            const bytes = Uint8Array.from(Buffer.from(pvtKey, "base64"));
+            return Buffer.from(bytes.slice(0, 32)).toString("base64");
+        } catch (error) {
+            throw new Error(`Failed to convert 64-byte key to 32-byte: ${error.message}`);
         }
+    }
 
-        const pubBinaryString = atob(pubKey);
-        const pubBytes = new Uint8Array(pubBinaryString.length);
-        for (let i = 0; i < pubBinaryString.length; i++) {
-            pubBytes[i] = pubBinaryString.charCodeAt(i);
+    /**
+     * Converts a 32-byte private key to 64-byte format
+     */
+    public convertKey32To64(pvtKey: string, pubKey: string): string {
+        try {
+            const pvtBytes = Uint8Array.from(Buffer.from(pvtKey, "base64"));
+            const pubBytes = Uint8Array.from(Buffer.from(pubKey, "base64"));
+            return Buffer.from(new Uint8Array([...pvtBytes, ...pubBytes])).toString("base64");
+        } catch (error) {
+            throw new Error(`Failed to convert 32-byte key to 64-byte: ${error.message}`);
         }
-
-        const mergedPvtKey = new Uint8Array([...pvtBytes, ...pubBytes]);
-        return Buffer.from(mergedPvtKey).toString("base64");
-    };
+    }
 }
