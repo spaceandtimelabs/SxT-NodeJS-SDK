@@ -1,6 +1,6 @@
 ## SxT-NodeJS-SDK
 
-JavaScript(NodeJS) SDK for Space and Time Gateway (javascript version >= 19.8.0)
+JavaScript(NodeJS) SDK for Space and Time Gateway (javascript version >= 19.8.0).
 
 ## Installation Instructions
 
@@ -16,7 +16,7 @@ or
 yarn add sxt-nodejs-sdk
 ```
 
-Then add the following environment values to your `.env` file
+Then add the following environment values to your `.env` file.
 
 ```sh
 BASEURL_GENERAL="SXT_BASE_URL"
@@ -25,7 +25,7 @@ SCHEMA=ed25519
 
 #### Working with source code
 
-_Note: Before running the code, rename `.env.sample` to `.env` and ensure that your credentials are setup in the `.env` file properly_
+_Note: Before running the code, rename `.env.sample` to `.env` and ensure that your credentials are setup in the `.env` file properly_.
 
 ```sh
 npm install
@@ -37,11 +37,11 @@ or
 yarn
 ```
 
-The code in `examples/index.ts` demonstrates how to call the SDK
+The code in `examples/index.ts` demonstrates how to call the SDK.
 
 ## Running your project
 
-To run your code, configure the **package.json** of your project like the following
+To run your code, configure the **package.json** of your project like the following.
 
 ```js
 "scripts": {
@@ -56,35 +56,35 @@ which requires this flag to run the code.
 ## Features
 
 -   **Sessions**
-    The SDK implements persistent storage in 1. _File based sessions_
+    The SDK implements persistent storage in 1. _File based sessions_.
 
 -   **Encryption**
     It supports ED25519 Public key encryption for Biscuit Authorization and securing data in the platform.
 
 -   **SQL Support**
 
-    -   Support for DDL : `creating own schema(namespace), tables, altering and deleting tables`
+    -   Support for DDL : `creating own schema(namespace), tables, altering and deleting tables`.
     -   Support for DML: `CRUD` operation support.
     -   Support for SQL: `select` operations support.
-    -   Support for SQL Views
+    -   Support for SQL Views.
 
 -   **Platform Discovery**
     For fetching metadata and information about the database resources.
 
-    -   Schemas
-    -   Tables
-    -   Table Columns
-    -   Table Indexes
-    -   Table Primary Keys
-    -   Table Relationships
-    -   Table Primary Key References
-    -   Table Foreign Key References
+    -   Schemas.
+    -   Tables.
+    -   Table Columns.
+    -   Table Indexes.
+    -   Table Primary Keys.
+    -   Table Relationships.
+    -   Table Primary Key References.
+    -   Table Foreign Key References.
 
 -   **Platform Blockchain**
-    For fetching blockchain metadata and information
-    -   Blockchains
-    -   Blockchain Schemas
-    -   Blockchain Information
+    For fetching blockchain metadata and information.
+    -   Blockchains.
+    -   Blockchain Schemas.
+    -   Blockchain Information.
 
 ## Examples
 
