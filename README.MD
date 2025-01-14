@@ -138,8 +138,6 @@ const accessToken = await authentication.GenerateToken(
 );
 // console.log("Access Token", accessToken);
 return accessToken.data;
-
-console.log(tokenResponse, tokenError);
 ```
 
 -   **Generating Biscuits, DDL, DML and DQL**
