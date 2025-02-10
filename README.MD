@@ -20,7 +20,7 @@ Then add the following environment values to your `.env` file
 
 ```sh
 BASEURL_GENERAL="SXT_BASE_URL"
-SCHEMA=ed25519
+SCHEME=ed25519
 ```
 
 #### Working with source code
@@ -194,7 +194,7 @@ To create a new **schema**, `ddl_create` permission is needed.
 ```js
 // Create a table
 const createTable = await sqlAPI.DDL(
-    `CREATE TABLE ${resourceName}  (id INT PRIMARY KEY, test VARCHAR)`,
+    `CREATE TABLE ${resourceName}  (id INT PRIMARY KEY, test VARCHAR) WITH "public_key=${keypair.biscuitPublicKeyHex_32},access_type=public_append"`,
     biscuitArray
 );
 // console.log("CREATE TABLE", createTable);
