@@ -34,7 +34,7 @@ npm install
 or
 
 ```sh
-yarn
+yarn install 
 ```
 
 The code in `examples/index.ts` demonstrates how to call the SDK.
