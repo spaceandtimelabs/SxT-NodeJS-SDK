@@ -1,5 +1,5 @@
 import nacl from "tweetnacl";
-import { PrivateKey, biscuit, block } from "@biscuit-auth/biscuit-wasm";
+import { PrivateKey, biscuit, block, Biscuit } from "@biscuit-auth/biscuit-wasm";
 import * as Types from "../helpers/types.js";
 
 interface KeyPairResult {
@@ -22,19 +22,21 @@ export class Authorization {
         privKey: string
     ): Types.APIResponse {
         try {
-            const biscuitBuilder = biscuit``;
+            let biscuitBuilder = biscuit``;
             
-            const token = capabilities
-                .reduce((builder, cap) => {
-                    const biscuitBlock = block`sxt:capability(${cap.operation}, ${cap.resource})`;
-                    return builder.merge(biscuitBlock);
-                }, biscuitBuilder)
+            // Use forEach instead of reduce since we're modifying the builder in place
+            capabilities.forEach(cap => {
+                const biscuitBlock = block`sxt:capability(${cap.operation}, ${cap.resource})`;
+                biscuitBuilder = biscuitBuilder.merge(biscuitBlock);
+            });
+
+            const token = biscuitBuilder
                 .build(PrivateKey.fromString(privKey))
                 .toBase64();
 
             return { data: [token] };
         } catch (error) {
-            throw new Error(`Failed to create biscuit token: ${error.message}`);
+            throw new Error(`Failed to create biscuit token: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -56,7 +58,7 @@ export class Authorization {
 
             return { data: [token] };
         } catch (error) {
-            throw new Error(`Failed to create wildcard biscuit token: ${error.message}`);
+            throw new Error(`Failed to create wildcard biscuit token: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -77,7 +79,7 @@ export class Authorization {
                 biscuitPublicKeyHex_32: Buffer.from(publicKey).toString("hex"),
             };
         } catch (error) {
-            throw new Error(`Failed to generate keypair: ${error.message}`);
+            throw new Error(`Failed to generate keypair: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -95,7 +97,7 @@ export class Authorization {
                 biscuitPublicKeyHex_32: keypair.biscuitPublicKeyHex_32,
             };
         } catch (error) {
-            throw new Error(`Failed to generate keypair from string: ${error.message}`);
+            throw new Error(`Failed to generate keypair from string: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -115,7 +117,7 @@ export class Authorization {
                 signature: Buffer.from(signatureArray).toString("hex").slice(0, 128),
             };
         } catch (error) {
-            throw new Error(`Failed to generate signature: ${error.message}`);
+            throw new Error(`Failed to generate signature: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -127,7 +129,7 @@ export class Authorization {
             const bytes = Uint8Array.from(Buffer.from(pvtKey, "base64"));
             return Buffer.from(bytes.slice(0, 32)).toString("base64");
         } catch (error) {
-            throw new Error(`Failed to convert 64-byte key to 32-byte: ${error.message}`);
+            throw new Error(`Failed to convert 64-byte key to 32-byte: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -140,7 +142,7 @@ export class Authorization {
             const pubBytes = Uint8Array.from(Buffer.from(pubKey, "base64"));
             return Buffer.from(new Uint8Array([...pvtBytes, ...pubBytes])).toString("base64");
         } catch (error) {
-            throw new Error(`Failed to convert 32-byte key to 64-byte: ${error.message}`);
+            throw new Error(`Failed to convert 32-byte key to 64-byte: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 }
